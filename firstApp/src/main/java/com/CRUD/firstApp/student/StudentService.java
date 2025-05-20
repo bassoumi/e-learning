@@ -9,15 +9,24 @@ import java.util.List;
 @Service
 public class StudentService {
 
-    public final StudentMapper studentMapper;
-    public final StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
+    private final  StudentMapper studentMapper;
 
-    public StudentService(StudentMapper studentMapper, StudentRepository studentRepository) {
-        this.studentMapper = studentMapper;
+    public StudentService(StudentRepository studentRepository, StudentMapper studentMapper ) {
         this.studentRepository = studentRepository;
+        this.studentMapper = studentMapper;
     }
 
- public List<Student> getAllStudents() {
+    public List<Student> getAllStudents() {
         return studentRepository.findAll();
- }
+    }
+
+    public StudentResponse createStudent(StudentRequest request) {
+        Student student = studentMapper.toEntity(request);
+        Student savedStudent = studentRepository.save(student);
+        return studentMapper.toResponse(savedStudent);
+    }
+
+
+
 }
