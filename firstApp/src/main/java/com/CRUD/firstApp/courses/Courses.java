@@ -1,14 +1,16 @@
 package com.CRUD.firstApp.courses;
 
 
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.CRUD.firstApp.Categorie.Categorie;
+import com.CRUD.firstApp.student.Student;
+import jakarta.persistence.*;
+import jdk.jfr.Category;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -26,6 +28,18 @@ public class Courses {
 
     @Embedded
     private CourseMetaData metadata;
+
+    @ManyToMany
+    @JoinTable(
+            name = "enrollments",
+            joinColumns = @JoinColumn(name = "cours_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private Set<Student> students = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Categorie categorie;
 
 
 
