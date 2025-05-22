@@ -2,6 +2,7 @@ package com.CRUD.firstApp.courses;
 
 
 import com.CRUD.firstApp.Categorie.Categorie;
+import com.CRUD.firstApp.instructors.Instructors;
 import com.CRUD.firstApp.student.Student;
 import jakarta.persistence.*;
 import jdk.jfr.Category;
@@ -40,6 +41,10 @@ public class Courses {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Categorie categorie;
+
+
+    @ManyToMany(mappedBy = "courses")
+    private List<Instructors> instructors;
 
 
 
