@@ -23,7 +23,7 @@ public class InstructorsControllers {
     }
 
     @GetMapping("/{id}")
-    public InstructorsResponce getInstructorById(@PathVariable int id) {
+    public Instructors getInstructorById(@PathVariable int id) {
         return instructorsService.getInstructorById(id);
     }
 

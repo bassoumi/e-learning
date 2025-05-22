@@ -5,6 +5,7 @@ import ch.qos.logback.core.util.StringUtil;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,12 +17,10 @@ public class CourseService {
 
     private final CoursesRepository coursesRepository;
     private final CourseMapper CourseMapper;
-    private final CourseMapper courseMapper;
 
     public CourseService(CoursesRepository coursesRepository, CourseMapper CourseMapper, CourseMapper courseMapper) {
         this.coursesRepository = coursesRepository;
         this.CourseMapper = CourseMapper;
-        this.courseMapper = courseMapper;
     }
 
     public List<CourseResponce> getCourses() {
@@ -32,7 +31,7 @@ public class CourseService {
 
     }
 
-    public CourseResponce addCourse(@Valid CoursRequest request) {
+    public CourseResponce addCourse(@Valid @RequestBody CoursRequest request) {
         var coursesEntity = CourseMapper.toEntityCourses(request);
         coursesRepository.save(coursesEntity);
         return CourseMapper.toResponceCourses(coursesEntity);

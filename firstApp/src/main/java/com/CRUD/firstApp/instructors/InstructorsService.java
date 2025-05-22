@@ -29,10 +29,10 @@ public class InstructorsService {
                 .collect(Collectors.toList());
     }
 
-    public InstructorsResponce getInstructorById(int id) {
-        var IntrucorsExsistng = instructorsRepository.findById(id)
+    public Instructors getInstructorById(int id) {
+        return   instructorsRepository.findById(id)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Instructor not found with id "+ id));
-        return instructorsMapper.toResponce(IntrucorsExsistng);
+
 
     }
 

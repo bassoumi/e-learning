@@ -1,31 +1,41 @@
 package com.CRUD.firstApp.courses;
 
 
+import com.CRUD.firstApp.contentcourse.ContentRequest;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 
 public record CoursRequest(
 
-         @NotBlank(message = "title must be valid ")
-         String title,
+        @NotBlank(message = "title must be valid")
+        String title,
 
-         @NotBlank(message = "description must be valid ")
-         String description,
+        @NotBlank(message = "description must be valid")
+        String description,
 
-         @NotBlank(message = "shortDescription must be valid ")
-         String shortDescription,
+        @NotBlank(message = "shortDescription must be valid")
+        String shortDescription,
 
-         @NotBlank(message = "level must be valid ")
-         String level,
+        @NotBlank(message = "level must be valid")
+        String level,
 
-         @NotBlank(message = "language must be valid ")
-         String language,
+        @NotBlank(message = "language must be valid")
+        String language,
 
-         @NotBlank(message = "coverImage must be valid ")
-         String coverImage,
+        @NotBlank(message = "coverImage must be valid")
+        String coverImage,
 
-         CourseMetaDataRequest metadata
+        @NotNull
+        int categoryId,
 
+        @NotNull
+        CourseMetaDataRequest metadata,
 
-) {
-}
+        List<ContentRequest> contents,
+
+        int instructorId
+
+) {}
