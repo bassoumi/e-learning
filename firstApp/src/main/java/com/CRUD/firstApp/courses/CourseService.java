@@ -1,14 +1,16 @@
 package com.CRUD.firstApp.courses;
 
 
-import ch.qos.logback.core.util.StringUtil;
+import com.CRUD.firstApp.Categorie.Categorie;
+import com.CRUD.firstApp.Categorie.CategorieService;
+import com.CRUD.firstApp.instructors.Instructors;
+import com.CRUD.firstApp.instructors.InstructorsService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,13 +19,17 @@ public class CourseService {
 
     private final CoursesRepository coursesRepository;
     private final CourseMapper CourseMapper;
+    private final CategorieService categorieService;
+    private final InstructorsService instructorsService;
 
-    public CourseService(CoursesRepository coursesRepository, CourseMapper CourseMapper, CourseMapper courseMapper) {
+    public CourseService(CoursesRepository coursesRepository, CourseMapper courseMapper, CategorieService categorieService, InstructorsService instructorsService) {
         this.coursesRepository = coursesRepository;
-        this.CourseMapper = CourseMapper;
+        CourseMapper = courseMapper;
+        this.categorieService = categorieService;
+        this.instructorsService = instructorsService;
     }
 
-    public List<CourseResponce> getCourses() {
+    public List<CourseResponse> getCourses() {
         return coursesRepository.findAll()
                 .stream()
                 .map(CourseMapper::toResponceCourses)
@@ -31,14 +37,45 @@ public class CourseService {
 
     }
 
-    public CourseResponce addCourse(@Valid @RequestBody CoursRequest request) {
-        var coursesEntity = CourseMapper.toEntityCourses(request);
-        coursesRepository.save(coursesEntity);
-        return CourseMapper.toResponceCourses(coursesEntity);
+    public CourseResponse addCourse(CoursRequest request) {
+        Categorie category;
+        try {
+            category = categorieService.getEntityById(request.categoryId());
+        } catch (ResourceNotFoundException ex) {
+            throw new ResourceNotFoundException(
+                    "Impossible de créer le cours : catégorie introuvable pour l'id " + request.categoryId()
+            );
+        }
+
+        // 2) Même mécanique pour l’Instructor
+        Instructors instructor;
+        try {
+            instructor = instructorsService.getInstructorById(request.instructorId());
+        } catch (ResourceNotFoundException ex) {
+            throw new ResourceNotFoundException(
+                    "Impossible de créer le cours : instructeur introuvable pour l'id " + request.instructorId()
+            );
+        }
+
+        // 3) Mapping + persistence
+        Courses courseEntity = CourseMapper.toEntityCourses(
+                request,
+                category,
+                List.of(instructor)
+        );
+        courseEntity.setCategorie(category);
+        courseEntity.setInstructors(List.of(instructor));
+        Courses saved = coursesRepository.save(courseEntity);
+
+
+
+        // 4) Retour du DTO
+        return CourseMapper.toResponceCourses(saved);
+
     }
 
 
-    public List<CourseResponce> getCourseById(int id) {
+    public List<CourseResponse> getCourseById(int id) {
         var coursesEntityById = coursesRepository.findById(id);
         if (coursesEntityById.isEmpty()) {
             throw new RuntimeException("Course not found with id " + id);
@@ -48,7 +85,7 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    public List<CourseResponce> getCourseBytitle(String title) {
+    public List<CourseResponse> getCourseBytitle(String title) {
         var CourseEntityBytitle = coursesRepository.findByTitle(title);
         if (CourseEntityBytitle.isEmpty()) {
             throw new RuntimeException("Course not found with name " + title);
@@ -62,7 +99,7 @@ public class CourseService {
 
     }
 
-    public CourseResponce updateCourses(@Valid int id, @Valid CoursRequest request) {
+    public CourseResponse updateCourses(@Valid int id, @Valid CoursRequest request) {
         var updatecourse = coursesRepository.findById(id);
         if (updatecourse.isEmpty()) {
             throw new RuntimeException("EURREUR UPDATE : Course not found with id " + id);

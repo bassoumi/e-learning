@@ -1,11 +1,11 @@
 package com.CRUD.firstApp.courses;
 
 import com.CRUD.firstApp.contentcourse.ContentResponce;
-import jakarta.validation.constraints.NotBlank;
+import com.CRUD.firstApp.quiz.QuizResponse;
 
 import java.util.List;
 
-public record CourseResponce(
+public record CourseResponse(
         String title,
         String description,
         String shortDescription,
@@ -14,5 +14,6 @@ public record CourseResponce(
         String coverImage,
         String categoryName,
         List<String> instructorNames,
-        List<ContentResponce> contents
+        List<ContentResponce> contents,
+        QuizResponse quiz
 ) {}

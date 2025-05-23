@@ -4,6 +4,7 @@ package com.CRUD.firstApp.courses;
 import com.CRUD.firstApp.Categorie.Categorie;
 import com.CRUD.firstApp.contentcourse.Content;
 import com.CRUD.firstApp.instructors.Instructors;
+import com.CRUD.firstApp.quiz.Quiz;
 import com.CRUD.firstApp.student.Student;
 import jakarta.persistence.*;
 import jdk.jfr.Category;
@@ -49,6 +50,11 @@ public class Courses {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Content> contents;
+
+    @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Quiz quiz;
+
+
 
 
 

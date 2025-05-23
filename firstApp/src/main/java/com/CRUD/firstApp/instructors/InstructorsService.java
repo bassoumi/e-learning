@@ -1,6 +1,7 @@
 package com.CRUD.firstApp.instructors;
 
 
+import com.CRUD.firstApp.courses.ResourceNotFoundException;
 import org.apache.catalina.util.StringUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class InstructorsService {
     }
 
 
+
     public List<InstructorsResponce> getAllInstructors() {
         return instructorsRepository.findAll()
                 .stream()
@@ -31,7 +33,7 @@ public class InstructorsService {
 
     public Instructors getInstructorById(int id) {
         return   instructorsRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Instructor not found with id "+ id));
+                .orElseThrow(()->   new ResourceNotFoundException("Instructeur introuvable pour l'id " + id));
 
 
     }

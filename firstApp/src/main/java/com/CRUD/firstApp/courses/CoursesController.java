@@ -18,22 +18,22 @@ public class CoursesController {
     }
 
     @GetMapping
-    public List<CourseResponce> getCourses() {
+    public List<CourseResponse> getCourses() {
         return CourseService.getCourses();
     }
 
     @PostMapping
-    public CourseResponce addCourse(@Valid @RequestBody CoursRequest request) {
+    public CourseResponse addCourse(@Valid @RequestBody CoursRequest request) {
         return CourseService.addCourse(request);
     }
 
     @GetMapping("/{id}")
-    public List<CourseResponce> getCourseById(@PathVariable int id) {
+    public List<CourseResponse> getCourseById(@PathVariable int id) {
         return CourseService.getCourseById(id);
     }
 
     @GetMapping("/title")
-    public List<CourseResponce> getCourseBytitle(@RequestParam String title) {
+    public List<CourseResponse> getCourseBytitle(@RequestParam String title) {
         return CourseService.getCourseBytitle(title);
     }
 
@@ -44,7 +44,7 @@ public class CoursesController {
     }
 
     @PutMapping("/{id}")
-    public CourseResponce updateCourse( @PathVariable int id ,  @RequestBody   CoursRequest request) {
+    public CourseResponse updateCourse(@PathVariable int id , @RequestBody   CoursRequest request) {
        return CourseService.updateCourses(id,request);
     }
 

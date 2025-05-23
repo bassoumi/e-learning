@@ -2,6 +2,7 @@ package com.CRUD.firstApp.courses;
 
 
 import com.CRUD.firstApp.contentcourse.ContentRequest;
+import com.CRUD.firstApp.quiz.QuizRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -36,6 +37,8 @@ public record CoursRequest(
 
         List<ContentRequest> contents,
 
-        int instructorId
+        int instructorId,
+
+        QuizRequest quiz
 
 ) {}

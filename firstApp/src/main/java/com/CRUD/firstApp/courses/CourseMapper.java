@@ -1,7 +1,13 @@
 package com.CRUD.firstApp.courses;
 
 
+import com.CRUD.firstApp.Categorie.Categorie;
 import com.CRUD.firstApp.contentcourse.Content;
+import com.CRUD.firstApp.contentcourse.ContentResponce;
+import com.CRUD.firstApp.instructors.Instructors;
+import com.CRUD.firstApp.quiz.Quiz;
+import com.CRUD.firstApp.quiz.QuizRequest;
+import com.CRUD.firstApp.quiz.QuizResponse;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -11,7 +17,10 @@ import java.util.stream.Collectors;
 @Component
 public class CourseMapper {
 
-    public Courses toEntityCourses(CoursRequest request){
+    public Courses toEntityCourses(CoursRequest request ,  Categorie category,
+                                   List<Instructors> instructors){
+
+
         Courses courses = new Courses();
         courses.setTitle(request.title());
         courses.setDescription(request.description());
@@ -52,18 +61,71 @@ public class CourseMapper {
             courses.setContents(contents);
         }
 
+        if (request.quiz() != null) {
+            QuizRequest quizReq = request.quiz();
+            Quiz quiz = new Quiz();
+            quiz.setTitle(quizReq.title());
+            quiz.setQuestions(quizReq.questions());
+            quiz.setOptions(quizReq.options());
+            quiz.setAnswers(quizReq.answers());
+            quiz.setCourse(courses); // Liaison bidirectionnelle
+            courses.setQuiz(quiz);
+        }
+
+
+        // ManyToOne category
+        courses.setCategorie(category);
+
+        // ManyToMany instructors
+        courses.setInstructors(instructors);
+
         return courses;
     }
 
 
-    public CourseResponce toResponceCourses(Courses responce){
+    public CourseResponse toResponceCourses(Courses course) {
+        String categoryName = course.getCategorie().getNom();
 
-      return  null ;
+        List<String> instructorNames = course.getInstructors().stream()
+                .map(Instructors::getFirstName)
+                .collect(Collectors.toList());
 
+        List<ContentResponce> contents = course.getContents().stream()
+                .map(c -> new ContentResponce(
+                        c.getTitle(),
+                        c.getDescription(),
+                        c.getVideoUrl(),
+                        c.getOrderContent()
+                ))
+                .collect(Collectors.toList());
 
+        QuizResponse quizResponse = null;
+        if (course.getQuiz() != null) {
+            quizResponse = new QuizResponse(
+                    course.getQuiz().getTitle(),
+                    course.getQuiz().getQuestions(),
+                    course.getQuiz().getOptions(),
+                    course.getQuiz().getAnswers()
+            );
+        }
 
-
+        return new CourseResponse(
+                course.getTitle(),
+                course.getDescription(),
+                course.getShortDescription(),
+                course.getLevel(),
+                course.getLanguage(),
+                course.getCoverImage(),
+                categoryName,
+                instructorNames,
+                contents,
+                quizResponse // Ajout ici
+        );
     }
 
 
+
 }
+
+
+

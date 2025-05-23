@@ -1,5 +1,7 @@
 package com.CRUD.firstApp.Categorie;
 
+import com.CRUD.firstApp.courses.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,13 @@ public class CategorieService {
         var category =  categorieRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found with ID: " + id));
         return categorieMapper.toCategorieResponce(category);
+    }
+
+
+    public Categorie getEntityById(int id) {
+        return categorieRepository.findById(id)
+                .orElseThrow(() ->     new ResourceNotFoundException("Catégorie introuvable pour l'id " + id)
+                );
     }
 
 
