@@ -2,6 +2,7 @@ package com.CRUD.firstApp.auth;
 
 
 import com.CRUD.firstApp.config.JwtService;
+import com.CRUD.firstApp.notification.email.EmailService;
 import com.CRUD.firstApp.user.Role;
 import com.CRUD.firstApp.user.User;
 import com.CRUD.firstApp.user.UserRepository;
@@ -20,6 +21,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     public AuthentificationResponse register(RegisterRequest request) {
         var user = User.builder()
@@ -30,6 +32,15 @@ public class AuthenticationService {
                 .role(Role.USER)
                 .build();
         userRepository.save(user);
+
+        emailService.sendRegistrationConfirmationEmail(
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName()
+
+
+        );
+
         var jwtToken = jwtService.generateToken(user);
         return  AuthentificationResponse.builder()
                 .token(jwtToken)
