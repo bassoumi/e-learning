@@ -32,7 +32,12 @@ public class SecurityConfiguration {
 
                 //if the requet return from the jwtauthfilter , we dont have token we search in the  permitAll
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // ⬅️ replace with your real public path (e.g., /api/auth/**)
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll() // ⬅️ replace with your real public path (e.g., /api/auth/**)
                         // if the requet return from the jwtauthfilter , we have token we search in the  authenticated() route protect with token
                         .anyRequest().authenticated()
                 )

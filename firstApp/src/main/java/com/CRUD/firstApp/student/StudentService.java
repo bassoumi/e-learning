@@ -24,9 +24,12 @@ public class StudentService {
         this.studentMapper = studentMapper;
     }
 
-    public List<Student> getAllStudents() {
+    public List<StudentResponse> getAllStudents() {
+        return studentRepository.findAll()
+                .stream()
+                .map(studentMapper::toResponse)
+                .collect(Collectors.toList());
 
-        return studentRepository.findAll();
     }
 
     public StudentResponse createStudent(StudentRequest studentRequest) {
