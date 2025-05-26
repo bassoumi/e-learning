@@ -32,10 +32,16 @@ public class InstructorsControllers {
         return instructorsService.getInstructorsByName(name);
     }
 
+    @GetMapping("email")
+    public Instructors getInstructorsByEmail(@RequestParam String email) {
+        return instructorsService.getInstructorsByEmail(email);
+    }
+
     @PostMapping
     public InstructorsResponce addInstructor(@RequestBody InstructorsRequest request) {
         return instructorsService.addInstructor(request);
     }
+    
     @PutMapping("/{id}")
     public InstructorsResponce updateInstructor(@PathVariable int id , @RequestBody InstructorsRequest request) {
         return instructorsService.updateInstructor(id,request);

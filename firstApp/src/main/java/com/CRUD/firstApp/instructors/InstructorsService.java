@@ -4,6 +4,7 @@ package com.CRUD.firstApp.instructors;
 import com.CRUD.firstApp.courses.ResourceNotFoundException;
 import org.apache.catalina.util.StringUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
@@ -81,4 +82,14 @@ public class InstructorsService {
     public void deleteInstructor(int id) {
          instructorsRepository.deleteById(id);
     }
+
+    public Instructors getInstructorsByEmail(String email) {
+        return instructorsRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Instructor not found with email " + email)
+                );
+    }
+
 }
+

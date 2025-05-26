@@ -117,6 +117,7 @@ public class CourseMapper {
                 course.getLanguage(),
                 course.getCoverImage(),
                 categoryName,
+                course.getMetadata(),
                 instructorNames,
                 contents,
                 quizResponse // Ajout ici

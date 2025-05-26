@@ -13,6 +13,7 @@ public record CourseResponse(
         String language,
         String coverImage,
         String categoryName,
+        CourseMetaData courseMetaData,
         List<String> instructorNames,
         List<ContentResponce> contents,
         QuizResponse quiz

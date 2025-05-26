@@ -46,6 +46,7 @@ public class studentController {
     public StudentResponse addStudent(@Valid @RequestBody StudentRequest request) {
         return studentService.createStudent(request);
     }
+
     @GetMapping("/{id}")
     public StudentResponse getStudentById( @PathVariable int id ) {
         return  studentService.getStudentById(id);
@@ -55,6 +56,12 @@ public class studentController {
     public List<StudentResponse> getStudentsByName(@RequestParam(required = true) @NotBlank String name) {
         return studentService.getStudentsByName(name);
     }
+
+    @GetMapping("/email")
+    public StudentResponse getStudentsByEmail(@RequestParam(required = true) @NotBlank String email) {
+        return studentService.getStudentsByEmail(email);
+    }
+
     @PutMapping("/{id}")
     public StudentResponse patchStudent(
             @PathVariable int id,

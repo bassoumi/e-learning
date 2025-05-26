@@ -18,6 +18,9 @@ public record InstructorsRequest(
         String profileImage,
 
         @NotBlank(message = "bio cannot be empty" )
-        String bio
+        String bio,
+
+        @NotBlank(message = "password cannot be empty" )
+        String password
 ) {
 }

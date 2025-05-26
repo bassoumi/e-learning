@@ -1,7 +1,7 @@
 package com.CRUD.firstApp.config;
 
 
-import com.CRUD.firstApp.user.User;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,11 +23,18 @@ import java.io.IOException;
 //filter the method take request , response , filterchain(pass to other filter with the same request that we have )
 //in our code we have to filter in filterChain (First filter (jwtAuthFilter):This filter checks the JWT token in the request header. Second filter (UsernamePasswordAuthenticationFilter):Normally, this filter handles the login process where username and password are submitted (e.g., via a login form).
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   UserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+        System.out.println(">>> Using UserDetailsService: " + userDetailsService.getClass());
+    }
+
 
     @Override
     protected void doFilterInternal(

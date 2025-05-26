@@ -19,6 +19,9 @@ public record StudentRequest (
          @Email(message = "email should be valid ")
          String email,
          String phone,
-         Address address
+         Address address,
+
+        @NotBlank(message = "password must not be empty")
+        String password
 ){
 }

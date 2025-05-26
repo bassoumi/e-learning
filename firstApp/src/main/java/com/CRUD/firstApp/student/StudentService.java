@@ -2,6 +2,7 @@ package com.CRUD.firstApp.student;
 
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -141,6 +142,11 @@ public class StudentService {
 
     public void deleteStudent(int id) {
         studentRepository.deleteById(id);
+
+    }
+
+    public StudentResponse getStudentsByEmail(@NotBlank String email) {
+        return studentMapper.toResponse(studentRepository.findByEmail(email).get());
 
     }
 }

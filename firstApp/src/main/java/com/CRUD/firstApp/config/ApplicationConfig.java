@@ -1,7 +1,10 @@
 package com.CRUD.firstApp.config;
 
 
-import com.CRUD.firstApp.user.UserRepository;
+import com.CRUD.firstApp.admin.Admin;
+import com.CRUD.firstApp.admin.AdminRepository;
+import com.CRUD.firstApp.instructors.InstructorsRepository;
+import com.CRUD.firstApp.student.StudentRepository;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,12 +19,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 @Configuration
 @RequiredArgsConstructor
 
 public class ApplicationConfig {
-    private final UserRepository UserRepository;
-
+    private final InstructorsRepository instructorsRepository;
+    private final StudentRepository studentRepository;
+    private final AdminRepository adminRepository;
 
 //    When you put @Bean on a method inside a @Configuration class, Spring will:
 //
@@ -35,9 +41,23 @@ public class ApplicationConfig {
     // It returns a UserDetails object, which contains username, hashed password, and roles.
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> UserRepository.findByEmail(username)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
+        return username -> {
+            // Try Admin first (login with username)
+            Optional<Admin> admin = adminRepository.findByEmail(username);
+            if (admin.isPresent()) {
+                return admin.get();
+            }
+
+            // Try Instructor and Student by email
+            return instructorsRepository.findByEmail(username)
+                    .map(user -> (UserDetails) user)
+                    .or(() -> studentRepository.findByEmail(username))
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        };
     }
+
+
+
 
 
     // authProvider check if is the same password and the username in userdetails
