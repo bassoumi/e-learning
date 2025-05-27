@@ -11,27 +11,29 @@ import com.CRUD.firstApp.quiz.QuizResponse;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class CourseMapper {
 
-    public Courses toEntityCourses(CoursRequest request ,  Categorie category,
-                                   List<Instructors> instructors){
-
-
+    public Courses toEntityCourses(
+            CoursRequest request,
+            Categorie category,
+            List<Instructors> instructors,
+            String coverImageFilename
+    ) {
         Courses courses = new Courses();
         courses.setTitle(request.title());
         courses.setDescription(request.description());
-        courses.setCoverImage(request.coverImage());
+        courses.setCoverImage(coverImageFilename);
         courses.setLanguage(request.language());
         courses.setLevel(request.level());
         courses.setShortDescription(request.shortDescription());
 
         if (request.metadata() != null) {
             CourseMetaDataRequest metaReq = request.metadata();
-
             CourseMetaData meta = new CourseMetaData();
             meta.setDuration(metaReq.duration());
             meta.setTags(metaReq.tags());
@@ -44,7 +46,6 @@ public class CourseMapper {
             courses.setMetadata(meta);
         }
 
-        // ✅ Mapper les contenus ici
         if (request.contents() != null && !request.contents().isEmpty()) {
             List<Content> contents = request.contents().stream()
                     .map(contentReq -> {
@@ -53,11 +54,10 @@ public class CourseMapper {
                         content.setDescription(contentReq.description());
                         content.setVideoUrl(contentReq.videoUrl());
                         content.setOrderContent(contentReq.orderContent());
-                        content.setCourse(courses); // Lien vers le cours
+                        content.setCourse(courses);
                         return content;
                     })
                     .collect(Collectors.toList());
-
             courses.setContents(contents);
         }
 
@@ -71,48 +71,54 @@ public class CourseMapper {
                         .flatMap(List::stream)
                         .collect(Collectors.toList());
                 quiz.setOptions(flatOptions);
-            }            quiz.setAnswers(quizReq.answers());
-            quiz.setCourse(courses); // Liaison bidirectionnelle
+            }
+            quiz.setAnswers(quizReq.answers());
+            quiz.setCourse(courses);
             courses.setQuiz(quiz);
         }
 
-
-        // ManyToOne category
         courses.setCategorie(category);
-
-        // ManyToMany instructors
         courses.setInstructors(instructors);
 
         return courses;
     }
 
-
     public CourseResponse toResponceCourses(Courses course) {
+        // 1) Récupérer le nom de la catégorie
         String categoryName = course.getCategorie().getNom();
 
-        List<String> instructorNames = course.getInstructors().stream()
+        // 2) Récupérer les noms d'instructeurs (s'il y en a)
+        List<String> instructorNames = (course.getInstructors() != null)
+                ? course.getInstructors().stream()
                 .map(Instructors::getFirstName)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+                : Collections.emptyList();
 
-        List<ContentResponce> contents = course.getContents().stream()
+        // 3) Mapper la liste de contents en ContentResponce (ou renvoyer une liste vide)
+        List<ContentResponce> contents = (course.getContents() != null)
+                ? course.getContents().stream()
                 .map(c -> new ContentResponce(
                         c.getTitle(),
                         c.getDescription(),
                         c.getVideoUrl(),
                         c.getOrderContent()
                 ))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+                : Collections.emptyList();
 
+        // 4) Mapper le quiz si présent
         QuizResponse quizResponse = null;
         if (course.getQuiz() != null) {
+            var q = course.getQuiz();
             quizResponse = new QuizResponse(
-                    course.getQuiz().getTitle(),
-                    course.getQuiz().getQuestions(),
-                    course.getQuiz().getOptions(),
-                    course.getQuiz().getAnswers()
+                    q.getTitle(),
+                    q.getQuestions(),
+                    q.getOptions(),
+                    q.getAnswers()
             );
         }
 
+        // 5) Construire et retourner le CourseResponse
         return new CourseResponse(
                 course.getTitle(),
                 course.getDescription(),
@@ -124,11 +130,9 @@ public class CourseMapper {
                 course.getMetadata(),
                 instructorNames,
                 contents,
-                quizResponse // Ajout ici
+                quizResponse
         );
     }
-
-
 
 }
 

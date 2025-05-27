@@ -2,7 +2,9 @@ package com.CRUD.firstApp.courses;
 
 
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,11 +24,12 @@ public class CoursesController {
         return CourseService.getCourses();
     }
 
-    @PostMapping
-    public CourseResponse addCourse(@Valid @RequestBody CoursRequest request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CourseResponse addCourse(
+            @Validated @ModelAttribute CoursRequest request
+    ) {
         return CourseService.addCourse(request);
     }
-
     @GetMapping("/{id}")
     public List<CourseResponse> getCourseById(@PathVariable int id) {
         return CourseService.getCourseById(id);
@@ -43,9 +46,10 @@ public class CoursesController {
          return ResponseEntity.ok("course with deleted with id "+id);
     }
 
-    @PutMapping("/{id}")
-    public CourseResponse updateCourse(@PathVariable int id , @RequestBody   CoursRequest request) {
-       return CourseService.updateCourses(id,request);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CourseResponse updateCourse(@PathVariable int id, @ModelAttribute CoursRequest request) {
+        return CourseService.updateCourses(id, request);
     }
+
 
 }

@@ -5,6 +5,7 @@ import com.CRUD.firstApp.contentcourse.ContentRequest;
 import com.CRUD.firstApp.quiz.QuizRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,18 +27,18 @@ public record CoursRequest(
         @NotBlank(message = "language must be valid")
         String language,
 
-        @NotBlank(message = "coverImage must be valid")
-        String coverImage,
+        @NotNull(message = "coverImage must be valid")
+        MultipartFile coverImage,
 
         @NotNull
-        int categoryId,
+        Integer  categoryId,
 
         @NotNull
         CourseMetaDataRequest metadata,
 
         List<ContentRequest> contents,
 
-        int instructorId,
+        Integer  instructorId,
 
         QuizRequest quiz
 
