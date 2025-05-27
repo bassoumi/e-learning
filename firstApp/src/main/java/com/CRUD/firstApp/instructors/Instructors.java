@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,13 +33,8 @@ public class Instructors implements UserDetails {
     private Role role;
 
 
-    @ManyToMany
-    @JoinTable(
-            name = "instructor_courses",
-            joinColumns = @JoinColumn(name = "instructor_id"),
-            inverseJoinColumns = @JoinColumn(name = "cours_id")
-    )
-    private List<Courses> courses;
+    @ManyToMany(mappedBy = "instructors", fetch = FetchType.LAZY)
+    private List<Courses> courses = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

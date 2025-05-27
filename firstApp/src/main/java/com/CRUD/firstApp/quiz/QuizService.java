@@ -52,25 +52,29 @@ public class QuizService {
 
     }
 
-    public QuizResponse updateQuiz(int id , QuizRequest request) {
-        var QuizToEntity = quizRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Quiz not found with id " + id));
-        if (StringUtils.hasText(request.title())){
-            QuizToEntity.setTitle(request.title());
+    public QuizResponse updateQuiz(int id, QuizRequest request) {
+        var quizEntity = quizRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quiz not found with id " + id));
+
+        if (StringUtils.hasText(request.title())) {
+            quizEntity.setTitle(request.title());
         }
-        if (StringUtils.hasText(request.questions())){
-            QuizToEntity.setQuestions(request.questions());
+        if (request.questions() != null && !request.questions().isEmpty()) {
+            quizEntity.setQuestions(request.questions());
         }
-        if (StringUtils.hasText(request.answers())){
-            QuizToEntity.setAnswers(request.answers());
+        if (request.answers() != null && !request.answers().isEmpty()) {
+            quizEntity.setAnswers(request.answers());
         }
-        if (StringUtils.hasText(request.options())){
-            QuizToEntity.setOptions(request.options());
+        if (request.options() != null && !request.options().isEmpty()) {
+            // flatten List<List<String>> → List<String>
+            List<String> flat = request.options().stream()
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+            quizEntity.setOptions(flat);
         }
 
-        quizRepository.save(QuizToEntity);
-        return quizMapper.toResponse(QuizToEntity);
-
+        quizRepository.save(quizEntity);
+        return quizMapper.toResponse(quizEntity);
     }
 
 

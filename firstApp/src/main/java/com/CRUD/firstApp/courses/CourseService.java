@@ -6,11 +6,14 @@ import com.CRUD.firstApp.Categorie.CategorieService;
 import com.CRUD.firstApp.instructors.Instructors;
 import com.CRUD.firstApp.instructors.InstructorsService;
 import jakarta.validation.Valid;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,14 +33,17 @@ public class CourseService {
     }
 
     public List<CourseResponse> getCourses() {
-        return coursesRepository.findAll()
-                .stream()
+        List<Courses> courses = coursesRepository.findAll();
+        // Pour chaque course, forcer l'initialisation de la collection:
+        courses.forEach(c -> Hibernate.initialize(c.getInstructors()));
+        return courses.stream()
                 .map(CourseMapper::toResponceCourses)
                 .collect(Collectors.toList());
 
     }
-
+    @Transactional
     public CourseResponse addCourse(CoursRequest request) {
+        // 1) Récupérer la catégorie
         Categorie category;
         try {
             category = categorieService.getEntityById(request.categoryId());
@@ -47,7 +53,7 @@ public class CourseService {
             );
         }
 
-        // 2) Même mécanique pour l’Instructor
+        // 2) Récupérer l'instructeur
         Instructors instructor;
         try {
             instructor = instructorsService.getInstructorById(request.instructorId());
@@ -57,23 +63,26 @@ public class CourseService {
             );
         }
 
-        // 3) Mapping + persistence
-        Courses courseEntity = CourseMapper.toEntityCourses(
-                request,
-                category,
-                List.of(instructor)
-        );
+        // 3) On crée l'entité Course (sans encore toucher à l'instructeur)
+        Courses courseEntity = CourseMapper.toEntityCourses(request, category, new ArrayList<>());
+
+        // 4) Définir la catégorie
         courseEntity.setCategorie(category);
-        courseEntity.setInstructors(List.of(instructor));
+
+        // 5) Ajouter l’instructeur DANS Courses.instructors (côté owning de la relation)
+        courseEntity.getInstructors().add(instructor);
+
+        // 6) (Optionnel) Pour garder la cohérence en mémoire, on peut aussi faire :
+        instructor.getCourses().add(courseEntity);
+
+        // 7) Sauvegarder : Hibernate va persister
+        //    - la ligne dans courses (grâce à CourseMapper.toEntityCourses)
+        //    - la ligne dans instructor_courses grâce au step 5
         Courses saved = coursesRepository.save(courseEntity);
 
-
-
-        // 4) Retour du DTO
+        // 8) Retourner le DTO
         return CourseMapper.toResponceCourses(saved);
-
     }
-
 
     public List<CourseResponse> getCourseById(int id) {
         var coursesEntityById = coursesRepository.findById(id);

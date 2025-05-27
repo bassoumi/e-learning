@@ -3,6 +3,9 @@ package com.CRUD.firstApp.quiz;
 
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class QuizMapper {
 
@@ -11,8 +14,12 @@ public class QuizMapper {
         quiz.setTitle(request.title());
         quiz.setQuestions(request.questions());
         quiz.setAnswers(request.answers());
-        quiz.setOptions(request.options());
-        return quiz;
+        if (request.options() != null && !request.options().isEmpty()) {
+            List<String> flatOptions = request.options().stream()
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+            quiz.setOptions(flatOptions);
+        }        return quiz;
     }
 
     public QuizResponse toResponse(Quiz quiz) {

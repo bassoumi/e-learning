@@ -66,8 +66,12 @@ public class CourseMapper {
             Quiz quiz = new Quiz();
             quiz.setTitle(quizReq.title());
             quiz.setQuestions(quizReq.questions());
-            quiz.setOptions(quizReq.options());
-            quiz.setAnswers(quizReq.answers());
+            if (quizReq.options() != null && !quizReq.options().isEmpty()) {
+                List<String> flatOptions = quizReq.options().stream()
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList());
+                quiz.setOptions(flatOptions);
+            }            quiz.setAnswers(quizReq.answers());
             quiz.setCourse(courses); // Liaison bidirectionnelle
             courses.setQuiz(quiz);
         }

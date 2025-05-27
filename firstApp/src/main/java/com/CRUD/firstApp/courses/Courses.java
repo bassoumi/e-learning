@@ -11,6 +11,7 @@ import jdk.jfr.Category;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,8 +46,14 @@ public class Courses {
     private Categorie categorie;
 
 
-    @ManyToMany(mappedBy = "courses")
-    private List<Instructors> instructors;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "instructor_courses",
+            joinColumns = @JoinColumn(name = "course_id"),         // correspond à la colonne "course_id" dans la table
+            inverseJoinColumns = @JoinColumn(name = "instructor_id")
+    )
+    private List<Instructors> instructors = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Content> contents;
