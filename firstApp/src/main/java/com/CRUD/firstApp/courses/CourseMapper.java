@@ -5,12 +5,11 @@ import com.CRUD.firstApp.Categorie.Categorie;
 import com.CRUD.firstApp.contentcourse.Content;
 import com.CRUD.firstApp.contentcourse.ContentResponce;
 import com.CRUD.firstApp.instructors.Instructors;
-import com.CRUD.firstApp.quiz.Quiz;
-import com.CRUD.firstApp.quiz.QuizRequest;
-import com.CRUD.firstApp.quiz.QuizResponse;
+import com.CRUD.firstApp.quiz.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,14 +64,22 @@ public class CourseMapper {
             QuizRequest quizReq = request.quiz();
             Quiz quiz = new Quiz();
             quiz.setTitle(quizReq.title());
-            quiz.setQuestions(quizReq.questions());
-            if (quizReq.options() != null && !quizReq.options().isEmpty()) {
-                List<String> flatOptions = quizReq.options().stream()
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList());
-                quiz.setOptions(flatOptions);
+
+            // map each QuestionRequest → Question embeddable
+            if (quizReq.questions() != null && !quizReq.questions().isEmpty()) {
+                List<QuizQuestions> questionEntities = quizReq.questions().stream()
+                        .map(qr -> {
+                            QuizQuestions q = new QuizQuestions();
+                            q.setText(qr.text());
+                            q.setOptions(new ArrayList<>(qr.options()));
+                            q.setAnswer(qr.answer());
+                            return q;
+                        })
+                        .toList();
+                quiz.setQuestions(questionEntities);
             }
-            quiz.setAnswers(quizReq.answers());
+
+            // link quiz ↔ course
             quiz.setCourse(courses);
             courses.setQuiz(quiz);
         }
@@ -98,6 +105,8 @@ public class CourseMapper {
         List<ContentResponce> contents = (course.getContents() != null)
                 ? course.getContents().stream()
                 .map(c -> new ContentResponce(
+                        c.getId(),
+                        String.valueOf(c.getCourse().getId()), // or just c.getCourse().getId() if courseId is an int
                         c.getTitle(),
                         c.getDescription(),
                         c.getVideoUrl(),
@@ -109,17 +118,28 @@ public class CourseMapper {
         // 4) Mapper le quiz si présent
         QuizResponse quizResponse = null;
         if (course.getQuiz() != null) {
-            var q = course.getQuiz();
+            Quiz q = course.getQuiz();
+
+            List<QuestionResponse> questionDtos = q.getQuestions().stream()
+                    .map(ques -> new QuestionResponse(
+                            ques.getText(),
+                            ques.getOptions(),
+                            ques.getAnswer()
+                    ))
+                    .toList();
+
             quizResponse = new QuizResponse(
-                    q.getTitle(),
-                    q.getQuestions(),
-                    q.getOptions(),
-                    q.getAnswers()
+                    q.getId(),           // quiz id
+                    q.getTitle(),        // quiz title
+                    course.getId(),      // course id
+                    questionDtos         // mapped questions
             );
         }
 
+
         // 5) Construire et retourner le CourseResponse
         return new CourseResponse(
+                course.getId(),
                 course.getTitle(),
                 course.getDescription(),
                 course.getShortDescription(),

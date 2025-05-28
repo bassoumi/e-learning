@@ -6,6 +6,7 @@ import com.CRUD.firstApp.quiz.QuizResponse;
 import java.util.List;
 
 public record CourseResponse(
+        int id,
         String title,
         String description,
         String shortDescription,

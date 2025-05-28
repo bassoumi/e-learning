@@ -6,9 +6,8 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
 public record QuizRequest (
-        @NotBlank String           title,
-        @NotEmpty  List<String>    questions,
-        @NotEmpty  List<List<String>> options,
-        @NotEmpty List<String> answers
+        String title,
+        Integer courseId,
+        List<QuestionRequest> questions
 ){
 }

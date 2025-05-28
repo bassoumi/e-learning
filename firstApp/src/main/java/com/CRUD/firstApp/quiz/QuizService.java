@@ -1,9 +1,14 @@
 package com.CRUD.firstApp.quiz;
 
 
+import com.CRUD.firstApp.courses.CourseResponse;
+import com.CRUD.firstApp.courses.CoursesRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,11 +17,13 @@ public class QuizService {
 
     private final QuizRepository quizRepository;
     private final QuizMapper quizMapper;
+    private final CoursesRepository CoursesRepository;
 
 
-    public QuizService(QuizRepository quizRepository, QuizMapper quizMapper) {
+    public QuizService(QuizRepository quizRepository, QuizMapper quizMapper, CoursesRepository coursesRepository) {
         this.quizRepository = quizRepository;
         this.quizMapper = quizMapper;
+        CoursesRepository = coursesRepository;
     }
 
 
@@ -45,37 +52,57 @@ public class QuizService {
 
     }
 
+    @Transactional
     public QuizResponse createQuiz(QuizRequest quizRequest) {
-        var QuizToEntity = quizMapper.toEnity(quizRequest);
-         quizRepository.save(QuizToEntity);
-        return quizMapper.toResponse(QuizToEntity);
+        Quiz quizEntity = quizMapper.toEntity(quizRequest);
 
-    }
-
-    public QuizResponse updateQuiz(int id, QuizRequest request) {
-        var quizEntity = quizRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Quiz not found with id " + id));
-
-        if (StringUtils.hasText(request.title())) {
-            quizEntity.setTitle(request.title());
-        }
-        if (request.questions() != null && !request.questions().isEmpty()) {
-            quizEntity.setQuestions(request.questions());
-        }
-        if (request.answers() != null && !request.answers().isEmpty()) {
-            quizEntity.setAnswers(request.answers());
-        }
-        if (request.options() != null && !request.options().isEmpty()) {
-            // flatten List<List<String>> → List<String>
-            List<String> flat = request.options().stream()
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
-            quizEntity.setOptions(flat);
+        if (quizRequest.courseId() != null) {
+            CoursesRepository.findById(quizRequest.courseId())
+                    .ifPresent(quizEntity::setCourse);
         }
 
         quizRepository.save(quizEntity);
         return quizMapper.toResponse(quizEntity);
     }
+
+
+
+    @Transactional
+    public QuizResponse updateQuiz(int id, QuizRequest request) {
+        Quiz quizEntity = quizRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Quiz not found with id " + id));
+
+        // 1. Update title if given
+        if (StringUtils.hasText(request.title())) {
+            quizEntity.setTitle(request.title());
+        }
+
+        // 2. Replace questions wholesale if provided
+        if (request.questions() != null) {
+            List<QuizQuestions> updatedQs = request.questions().stream()
+                    .map(qr -> {
+                        QuizQuestions q = new QuizQuestions();
+                        q.setText(qr.text());
+                        q.setOptions(new ArrayList<>(qr.options()));
+                        q.setAnswer(qr.answer());
+                        return q;
+                    })
+                    .toList();
+            quizEntity.setQuestions(updatedQs);
+        }
+
+        // 3. Update course association
+        if (request.courseId() != null) {
+            CoursesRepository.findById(request.courseId())
+                    .ifPresent(quizEntity::setCourse);
+        }
+
+        // 4. Save changes and return DTO
+        quizRepository.save(quizEntity);
+        return quizMapper.toResponse(quizEntity);
+    }
+
+
 
 
     public void deleteQuiz(int id) {
