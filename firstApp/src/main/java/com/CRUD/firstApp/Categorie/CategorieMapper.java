@@ -17,6 +17,7 @@ public class CategorieMapper {
 
     public CategorieResponce toCategorieResponce(Categorie categorie) {
         return new CategorieResponce(
+                categorie.getId(),
                 categorie.getNom(),
                 categorie.getDescription(),
                 categorie.getSlug(),

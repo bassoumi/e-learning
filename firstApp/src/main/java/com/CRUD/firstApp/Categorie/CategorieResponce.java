@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public record CategorieResponce(
 
-
+        int id,
 
         String nom,
 

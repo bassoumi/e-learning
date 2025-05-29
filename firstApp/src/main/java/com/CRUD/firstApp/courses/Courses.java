@@ -58,7 +58,11 @@ public class Courses {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Content> contents;
 
-    @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(
+            mappedBy = "course",           // si Quiz a @JoinColumn(name="course_id")
+            cascade = CascadeType.ALL,     // pour que persister Course persiste automatiquement Quiz
+            orphanRemoval = true
+    )
     private Quiz quiz;
 
 

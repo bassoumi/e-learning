@@ -18,6 +18,7 @@ public class InstructorsMapper {
 
     public InstructorsResponce toResponce(Instructors instructors) {
         return new InstructorsResponce(
+                instructors.getId(),
                 instructors.getFirstName(),
                 instructors.getLastName(),
                 instructors.getEmail(),

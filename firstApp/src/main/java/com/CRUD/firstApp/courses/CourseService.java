@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,50 +47,25 @@ public class CourseService {
     }
     @Transactional
     public CourseResponse addCourse(CoursRequest request) {
-        // 1) Récupérer la catégorie à partir de l’ID présent dans le record
-        Categorie category;
-        try {
-            category = categorieService.getEntityById(request.categoryId());
-        } catch (ResourceNotFoundException ex) {
-            throw new ResourceNotFoundException(
-                    "Impossible de créer le cours : catégorie introuvable pour l’ID " + request.categoryId()
-            );
-        }
+        // Récupération directe (exception lancée si pas trouvé)
+        Categorie category = categorieService.getEntityById(request.categoryId()); // ✅ this is an Integer or int
+        Instructors instructor = instructorsService.getInstructorById(request.instructorId());
 
-        // 2) Récupérer l’instructeur à partir de l’ID présent dans le record
-        Instructors instructor;
-        try {
-            instructor = instructorsService.getInstructorById(request.instructorId());
-        } catch (ResourceNotFoundException ex) {
-            throw new ResourceNotFoundException(
-                    "Impossible de créer le cours : instructeur introuvable pour l’ID " + request.instructorId()
-            );
-        }
-
-        // 3) Sauvegarder l’image et récupérer le nom du fichier
+        // Sauvegarde de l’image
         String storedFilename = courseFileStorageService.storeFile(request.coverImage());
 
-        // 4) Mapper vers l’entité Courses (en passant le titre, la catégorie, la liste d’instructeurs vide, et le nom de fichier)
+        // Mapping en entité
         Courses courseEntity = CourseMapper.toEntityCourses(
                 request,
                 category,
-                new ArrayList<>(),    // liste vide d’instructeurs pour l’instant
-                storedFilename        // nom ou chemin du fichier d’image
+                List.of(instructor),   // on passe directement la liste contenant l’instructeur
+                storedFilename
         );
 
-        // 5) Définir la catégorie
-        courseEntity.setCategorie(category);
-
-        // 6) Ajouter l’instructeur DANS courseEntity (côté owning)
-        courseEntity.getInstructors().add(instructor);
-
-        // 7) (Optionnel) Mettre à jour côté instructeur pour la cohérence en mémoire
-        instructor.getCourses().add(courseEntity);
-
-        // 8) Sauvegarder l’entité Courses (Hibernate gère la jointure ManyToMany)
+        // Persistance (inclut la M-to-M)
         Courses saved = coursesRepository.save(courseEntity);
 
-        // 9) Mapper l’entité sauvegardée vers le DTO de réponse
+        // Retour du DTO
         return CourseMapper.toResponceCourses(saved);
     }
 
@@ -103,14 +79,15 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    public List<CourseResponse> getCourseBytitle(String title) {
-        var CourseEntityBytitle = coursesRepository.findByTitle(title);
-        if (CourseEntityBytitle.isEmpty()) {
-            throw new RuntimeException("Course not found with name " + title);
-        }
-        return CourseEntityBytitle.stream()
+    public List<CourseResponse> getCoursesByTitle(String title) {
+        List<Courses> found = coursesRepository
+                .findByTitleContainingIgnoreCase(title.trim());
+        // simply return empty list if none—no exception
+        return found.stream()
                 .map(CourseMapper::toResponceCourses)
-                .collect(Collectors.toList());    }
+                .collect(Collectors.toList());
+    }
+
 
     public void deleteCourseById(int id) {
         coursesRepository.deleteById(id);
@@ -163,25 +140,33 @@ public class CourseService {
             existingValue.getInstructors().add(newInstructor);
         }
 
-        // Mettre à jour les métadonnées
-        if (request.metadata() != null) {
-            CourseMetaDataRequest incoming = request.metadata();
-            CourseMetaData stored = existingValue.getMetadata();
-            if (stored == null) {
-                stored = new CourseMetaData();
-            }
-
-            if (incoming.duration() != null) stored.setDuration(incoming.duration());
-            if (incoming.tags() != null && !incoming.tags().isEmpty()) stored.setTags(incoming.tags());
-            if (incoming.objectives() != null && !incoming.objectives().isEmpty()) stored.setObjectives(incoming.objectives());
-
-            stored.setUpdatedAt(LocalDateTime.now());
-            existingValue.setMetadata(stored);
-        }
+//        // Mettre à jour les métadonnées
+//        if (request.metadata() != null) {
+//            CourseMetaDataRequest incoming = request.metadata();
+//            CourseMetaData stored = existingValue.getMetadata();
+//            if (stored == null) {
+//                stored = new CourseMetaData();
+//            }
+//
+//            if (incoming.duration() != null) stored.setDuration(incoming.duration());
+//            if (incoming.tags() != null && !incoming.tags().isEmpty()) stored.setTags(incoming.tags());
+//            if (incoming.objectives() != null && !incoming.objectives().isEmpty()) stored.setObjectives(incoming.objectives());
+//
+//            stored.setUpdatedAt(LocalDateTime.now());
+//            existingValue.setMetadata(stored);
+//        }
 
         // Enregistrer et retourner
         Courses saved = coursesRepository.save(existingValue);
         return CourseMapper.toResponceCourses(saved);
     }
+
+    public List<CourseResponse> getCoursesByCategory(int categoryId) {
+        List<Courses> courses = coursesRepository.findByCategorieId(categoryId);
+        return courses.stream()
+                .map(CourseMapper::toResponceCourses)
+                .collect(Collectors.toList());
+    }
+
 
 }

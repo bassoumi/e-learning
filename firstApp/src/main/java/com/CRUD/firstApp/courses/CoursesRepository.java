@@ -10,10 +10,12 @@ import java.util.List;
 
 @Repository
 public interface CoursesRepository extends JpaRepository<Courses, Integer> {
+    List<Courses> findByCategorieId(int categoryId);
     List<Courses> findByTitle(String title);
 
     @EntityGraph(attributePaths = "instructors")
     @Query("SELECT c FROM Courses c")
     List<Courses> findAllWithInstructors();
+    List<Courses> findByTitleContainingIgnoreCase(String title);
 
 }

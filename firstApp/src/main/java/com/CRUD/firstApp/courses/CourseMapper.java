@@ -62,28 +62,28 @@ public class CourseMapper {
 
         if (request.quiz() != null) {
             QuizRequest quizReq = request.quiz();
+
             Quiz quiz = new Quiz();
             quiz.setTitle(quizReq.title());
+            // — no quiz.setId(...) here! Let Hibernate generate it.
 
-            // map each QuestionRequest → Question embeddable
+            // Map each QuestionRequest → QuizQuestions, using the helper to keep links in sync
             if (quizReq.questions() != null && !quizReq.questions().isEmpty()) {
-                List<QuizQuestions> questionEntities = quizReq.questions().stream()
-                        .map(qr -> {
-                            QuizQuestions q = new QuizQuestions();
-                            q.setText(qr.text());
-                            q.setOptions(new ArrayList<>(qr.options()));
-                            q.setAnswer(qr.answer());
-                            return q;
-                        })
-                        .toList();
-                quiz.setQuestions(questionEntities);
+                for (var qr : quizReq.questions()) {
+                    QuizQuestions q = new QuizQuestions();
+                    q.setText(qr.text());
+                    q.setOptions(new ArrayList<>(qr.options()));
+                    q.setAnswer(qr.answer());
+                    quiz.addQuestion(q);    // sets q.setQuiz(this) AND adds to quiz.getQuestions()
+                }
             }
 
-            // link quiz ↔ course
+            // Link Quiz ↔ Course
             quiz.setCourse(courses);
             courses.setQuiz(quiz);
         }
 
+        // 4. Set category + instructors
         courses.setCategorie(category);
         courses.setInstructors(instructors);
 
@@ -147,6 +147,7 @@ public class CourseMapper {
                 course.getLanguage(),
                 course.getCoverImage(),
                 categoryName,
+                course.getCategorie().getId(),
                 course.getMetadata(),
                 instructorNames,
                 contents,

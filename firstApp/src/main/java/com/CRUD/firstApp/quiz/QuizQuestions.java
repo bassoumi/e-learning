@@ -13,14 +13,13 @@ import java.util.List;
 @Table(name = "quiz_question")
 public class QuizQuestions {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ← back-pointer to Quiz: you must have this field...
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quiz_id")
+    // ← back-pointer vers Quiz : ce champ doit impérativement être renseigné (nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
-
 
     @Column(nullable = false)
     private String text;

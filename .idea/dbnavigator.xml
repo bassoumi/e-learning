@@ -6,7 +6,7 @@
   </component>
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="true" />
+    <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
@@ -24,7 +24,56 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc">
-      <console name="psotgres_E-learning Connection" type="STANDARD" schema="mydb" session="Main" />
+      <console name="psotgres_E-learning Connection" type="STANDARD" schema="public" session="Main"><![CDATA[-- ─── 1) Table courses (si elle n'existe pas encore) ─────────────────────────────
+-- (on suppose qu'elle contient déjà les colonnes nécessaires et qu'elle existe)
+-- Si vous devez la recréer, adaptez ceci à votre propre schéma :
+-- DROP TABLE IF EXISTS courses CASCADE;
+-- CREATE TABLE courses (
+--     id          SERIAL       PRIMARY KEY,
+--     title       VARCHAR(255) NOT NULL,
+--     description TEXT,
+--     shortdescription TEXT,
+--     level       VARCHAR(100),
+--     language    VARCHAR(50),
+--     coverimage  VARCHAR(255),
+--     category_id INTEGER     REFERENCES categorie(id)
+--     -- etc.
+-- );
+
+
+-- ─── 2) Table quiz ───────────────────────────────────────────────────────────────
+DROP TABLE IF EXISTS quiz CASCADE;
+
+CREATE TABLE quiz (
+    id         SERIAL         PRIMARY KEY,
+    title      VARCHAR(255)   NOT NULL,
+    course_id  INTEGER        NOT NULL
+        REFERENCES courses(id) ON DELETE CASCADE
+    -- ajoutez ici d’autres colonnes si besoin
+);
+
+
+-- ─── 3) Table quiz_question ─────────────────────────────────────────────────────
+DROP TABLE IF EXISTS quiz_question CASCADE;
+
+CREATE TABLE quiz_question (
+    id         BIGSERIAL      PRIMARY KEY,
+    quiz_id    INTEGER        NOT NULL
+        REFERENCES quiz(id) ON DELETE CASCADE,
+    text       TEXT           NOT NULL,
+    answer     TEXT           NOT NULL
+    -- Si vous voulez stocker date de création ou autre, ajoutez-les
+);
+
+
+-- ─── 4) Table pour stocker les options de chaque question ────────────────────────
+DROP TABLE IF EXISTS quiz_question_options CASCADE;
+
+CREATE TABLE quiz_question_options (
+    question_id   BIGINT        NOT NULL
+        REFERENCES quiz_question(id) ON DELETE CASCADE,
+    option_text   VARCHAR(255)  NOT NULL
+);]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -32,7 +81,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/content" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/quiz" />
     </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
@@ -40,7 +89,11 @@
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.quiz" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.quiz_question" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.content" active-filter-id="EMPTY_FILTER" />
+  </component>
+  <component name="DBNavigator.Project.ExecutionManager">
+    <retain-sticky-names value="false" />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
@@ -562,5 +615,9 @@
         </visibility-settings>
       </environment>
     </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
+    <execution-variable-types />
   </component>
 </project>

@@ -16,20 +16,19 @@ public class QuizMapper {
         quiz.setTitle(request.title());
 
         if (request.questions() != null) {
-            List<QuizQuestions> qEntities = request.questions().stream()
-                    .map(qr -> {
-                        QuizQuestions q = new QuizQuestions();
-                        q.setQuiz(quiz);   // back-reference set here!
-                        q.setText(qr.text());
-                        q.setOptions(new ArrayList<>(qr.options()));
-                        q.setAnswer(qr.answer());
-                        return q;
-                    })
-                    .toList();
-            quiz.setQuestions(qEntities);
+            // don’t build a separate list—use the helper to keep the bidirectional link in sync
+            for (var qr : request.questions()) {
+                QuizQuestions q = new QuizQuestions();
+                q.setText(qr.text());
+                q.setOptions(new ArrayList<>(qr.options()));
+                q.setAnswer(qr.answer());
+                quiz.addQuestion(q);    // adds to quiz.questions AND does q.setQuiz(this)
+            }
         }
+
         return quiz;
     }
+
 
 
     public QuizResponse toResponse(Quiz quiz) {

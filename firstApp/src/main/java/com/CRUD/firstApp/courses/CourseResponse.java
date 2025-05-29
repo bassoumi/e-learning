@@ -14,6 +14,7 @@ public record CourseResponse(
         String language,
         String coverImage,
         String categoryName,
+        int categoryId,
         CourseMetaData courseMetaData,
         List<String> instructorNames,
         List<ContentResponce> contents,
