@@ -23,6 +23,7 @@ public class StudentMapper {
 
     public StudentResponse toResponse(Student response) {
         return  new StudentResponse(
+                response.getId(),
                 response.getFirstName(),
                 response.getLastName(),
                 response.getGender(),

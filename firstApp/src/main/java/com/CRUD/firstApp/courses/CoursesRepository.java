@@ -1,5 +1,6 @@
 package com.CRUD.firstApp.courses;
 
+import com.CRUD.firstApp.instructors.Instructors;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,5 +18,8 @@ public interface CoursesRepository extends JpaRepository<Courses, Integer> {
     @Query("SELECT c FROM Courses c")
     List<Courses> findAllWithInstructors();
     List<Courses> findByTitleContainingIgnoreCase(String title);
+
+    List<Courses> findByInstructorId(int instructorId);
+
 
 }

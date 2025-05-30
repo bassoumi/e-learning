@@ -20,7 +20,7 @@ public class CourseMapper {
     public Courses toEntityCourses(
             CoursRequest request,
             Categorie category,
-            List<Instructors> instructors,
+            Instructors instructors,
             String coverImageFilename
     ) {
         Courses courses = new Courses();
@@ -85,28 +85,34 @@ public class CourseMapper {
 
         // 4. Set category + instructors
         courses.setCategorie(category);
-        courses.setInstructors(instructors);
+        courses.setInstructor(instructors);
 
         return courses;
     }
 
     public CourseResponse toResponceCourses(Courses course) {
-        // 1) Récupérer le nom de la catégorie
-        String categoryName = course.getCategorie().getNom();
+        // 1) Vérifier que la catégorie n’est pas nulle (ou gérer son absence)
+        String categoryName = (course.getCategorie() != null)
+                ? course.getCategorie().getNom()
+                : null;
+        Integer categoryId = (course.getCategorie() != null)
+                ? course.getCategorie().getId()
+                : null;
 
-        // 2) Récupérer les noms d'instructeurs (s'il y en a)
-        List<String> instructorNames = (course.getInstructors() != null)
-                ? course.getInstructors().stream()
-                .map(Instructors::getFirstName)
-                .collect(Collectors.toList())
-                : Collections.emptyList();
+        // 2) Récupérer et tester l’instructeur
+        Integer instructorId = (course.getInstructor() != null)
+                ? course.getInstructor().getId()
+                : null;
+        String instructorNames = (course.getInstructor() != null)
+                ? course.getInstructor().getFirstName()
+                : null;
 
-        // 3) Mapper la liste de contents en ContentResponce (ou renvoyer une liste vide)
+        // 3) Mapper les contenus (inchangé)
         List<ContentResponce> contents = (course.getContents() != null)
                 ? course.getContents().stream()
                 .map(c -> new ContentResponce(
                         c.getId(),
-                        String.valueOf(c.getCourse().getId()), // or just c.getCourse().getId() if courseId is an int
+                        String.valueOf(c.getCourse().getId()),
                         c.getTitle(),
                         c.getDescription(),
                         c.getVideoUrl(),
@@ -115,29 +121,27 @@ public class CourseMapper {
                 .collect(Collectors.toList())
                 : Collections.emptyList();
 
-        // 4) Mapper le quiz si présent
+        // 4) Mapper le quiz (idem)
         QuizResponse quizResponse = null;
         if (course.getQuiz() != null) {
             Quiz q = course.getQuiz();
-
             List<QuestionResponse> questionDtos = q.getQuestions().stream()
                     .map(ques -> new QuestionResponse(
                             ques.getText(),
                             ques.getOptions(),
                             ques.getAnswer()
                     ))
-                    .toList();
+                    .collect(Collectors.toList());
 
             quizResponse = new QuizResponse(
-                    q.getId(),           // quiz id
-                    q.getTitle(),        // quiz title
-                    course.getId(),      // course id
-                    questionDtos         // mapped questions
+                    q.getId(),
+                    q.getTitle(),
+                    course.getId(),
+                    questionDtos
             );
         }
 
-
-        // 5) Construire et retourner le CourseResponse
+        // 5) Construire le CourseResponse en passant des Integer pour categoryId et instructorId
         return new CourseResponse(
                 course.getId(),
                 course.getTitle(),
@@ -147,13 +151,16 @@ public class CourseMapper {
                 course.getLanguage(),
                 course.getCoverImage(),
                 categoryName,
-                course.getCategorie().getId(),
+                categoryId,
+                instructorId,
                 course.getMetadata(),
                 instructorNames,
                 contents,
                 quizResponse
         );
     }
+
+
 
 }
 

@@ -8,14 +8,8 @@ import java.time.LocalDateTime;
 
 public record ProgressionRequest(
 
-         Student student,
-
-         Content contentEnCours,
-
-         Double progressionPercentage,
-
-         LocalDateTime lastAccessed,
-
-         ProgressionStatus status
+        Double progressionPercentage,
+        LocalDateTime lastAccessed,
+        ProgressionStatus status
 ) {
 }

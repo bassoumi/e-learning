@@ -42,6 +42,15 @@ public class CoursesController {
     public List<CourseResponse> getCoursesByCategory(@PathVariable int categoryId) {
         return CourseService.getCoursesByCategory(categoryId);
     }
+
+
+    @GetMapping("/instructor/{instructorId}")
+    public List<CourseResponse> getCoursesByInstructor(@PathVariable int instructorId) {
+        return CourseService.getCoursesByInstructor(instructorId);
+    }
+
+
+
         @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CourseResponse> addCourse(
                 @RequestParam("title") String title,

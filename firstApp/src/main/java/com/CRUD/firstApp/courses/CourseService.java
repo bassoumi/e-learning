@@ -39,7 +39,7 @@ public class CourseService {
     public List<CourseResponse> getCourses() {
         List<Courses> courses = coursesRepository.findAll();
         // Pour chaque course, forcer l'initialisation de la collection:
-        courses.forEach(c -> Hibernate.initialize(c.getInstructors()));
+        courses.forEach(c -> Hibernate.initialize(c.getInstructor()));
         return courses.stream()
                 .map(CourseMapper::toResponceCourses)
                 .collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class CourseService {
         Courses courseEntity = CourseMapper.toEntityCourses(
                 request,
                 category,
-                List.of(instructor),   // on passe directement la liste contenant l’instructeur
+                instructor,   // on passe directement la liste contenant l’instructeur
                 storedFilename
         );
 
@@ -134,11 +134,13 @@ public class CourseService {
         }
 
         // Mettre à jour l’instructeur si nécessaire (optionnel selon ton besoin métier)
-        if (request.instructorId() != null) {
+        if (request.instructorId() != null &&
+                (existingValue.getInstructor() == null || !request.instructorId().equals(existingValue.getInstructor().getId()))) {
+
             Instructors newInstructor = instructorsService.getInstructorById(request.instructorId());
-            existingValue.getInstructors().clear(); // remplace le ou les anciens instructeurs
-            existingValue.getInstructors().add(newInstructor);
+            existingValue.setInstructor(newInstructor);
         }
+
 
 //        // Mettre à jour les métadonnées
 //        if (request.metadata() != null) {
@@ -163,6 +165,15 @@ public class CourseService {
 
     public List<CourseResponse> getCoursesByCategory(int categoryId) {
         List<Courses> courses = coursesRepository.findByCategorieId(categoryId);
+        return courses.stream()
+                .map(CourseMapper::toResponceCourses)
+                .collect(Collectors.toList());
+    }
+
+
+
+    public List<CourseResponse> getCoursesByInstructor(int instructorId) {
+        List<Courses> courses = coursesRepository.findByInstructorId(instructorId);
         return courses.stream()
                 .map(CourseMapper::toResponceCourses)
                 .collect(Collectors.toList());

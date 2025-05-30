@@ -3,12 +3,13 @@ package com.CRUD.firstApp.auth;
 import com.CRUD.firstApp.admin.AdminRequest;
 import com.CRUD.firstApp.instructors.InstructorsRequest;
 import com.CRUD.firstApp.student.StudentRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -17,10 +18,16 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register-Instructor")
-    public ResponseEntity<AuthentificationResponse> registerInstructor(@RequestBody InstructorsRequest request) {
-        return ResponseEntity.ok(authenticationService.registerInstructor(request));
-
+    @PostMapping(
+            path = "/register-instructor",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<AuthentificationResponse> registerInstructor(
+            @ModelAttribute @Valid InstructorsRequest request
+    ) throws IOException {
+        AuthentificationResponse response =
+                authenticationService.registerInstructor(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/authenticate")

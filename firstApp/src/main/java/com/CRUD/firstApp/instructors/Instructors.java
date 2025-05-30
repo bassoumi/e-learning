@@ -4,6 +4,7 @@ package com.CRUD.firstApp.instructors;
 import com.CRUD.firstApp.auth.Role;
 import com.CRUD.firstApp.courses.Courses;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,7 +34,8 @@ public class Instructors implements UserDetails {
     private Role role;
 
 
-    @ManyToMany(mappedBy = "instructors", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Courses> courses = new ArrayList<>();
 
     @Override

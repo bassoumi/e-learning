@@ -46,13 +46,10 @@ public class Courses {
     private Categorie categorie;
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(
-            name = "instructor_courses",
-            joinColumns = @JoinColumn(name = "course_id"),         // correspond à la colonne "course_id" dans la table
-            inverseJoinColumns = @JoinColumn(name = "instructor_id")
-    )
-    private List<Instructors> instructors = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "instructor_id")
+    private Instructors instructor;
+
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL , orphanRemoval = true)

@@ -2,9 +2,12 @@ package com.CRUD.firstApp.instructors;
 
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -37,14 +40,18 @@ public class InstructorsControllers {
         return instructorsService.getInstructorsByEmail(email);
     }
 
-    @PostMapping
-    public InstructorsResponce addInstructor(@RequestBody InstructorsRequest request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public InstructorsResponce addInstructor(@ModelAttribute InstructorsRequest request) throws IOException {
         return instructorsService.addInstructor(request);
     }
-    
-    @PutMapping("/{id}")
-    public InstructorsResponce updateInstructor(@PathVariable int id , @RequestBody InstructorsRequest request) {
-        return instructorsService.updateInstructor(id,request);
+
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public InstructorsResponce updateInstructor(
+            @PathVariable int id,
+            @ModelAttribute InstructorsRequest request
+    ) throws IOException {
+        return instructorsService.updateInstructor(id, request);
     }
 
     @DeleteMapping("/{id}")

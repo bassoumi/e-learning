@@ -14,9 +14,11 @@ public record CourseResponse(
         String language,
         String coverImage,
         String categoryName,
-        int categoryId,
+        Integer categoryId,      // ← passage à Integer
+        Integer instructorId,    // ← passage à Integer
         CourseMetaData courseMetaData,
-        List<String> instructorNames,
+        String instructorNames,
         List<ContentResponce> contents,
         QuizResponse quiz
 ) {}
+

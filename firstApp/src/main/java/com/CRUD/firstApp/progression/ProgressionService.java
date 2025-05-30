@@ -1,10 +1,19 @@
 package com.CRUD.firstApp.progression;
 
 
+import com.CRUD.firstApp.contentcourse.Content;
+import com.CRUD.firstApp.contentcourse.ContentRepository;
+import com.CRUD.firstApp.courses.CourseResponse;
+import com.CRUD.firstApp.courses.CourseResponseProgress;
+import com.CRUD.firstApp.courses.Courses;
+import com.CRUD.firstApp.courses.CoursesRepository;
+import com.CRUD.firstApp.student.Student;
+import com.CRUD.firstApp.student.StudentRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -12,6 +21,9 @@ import java.util.stream.Collectors;
 public class ProgressionService {
     private final ProgressionRepository progressionRepository;
     private final ProgressionMapper progressionMapper;
+    private final ContentRepository contentRepository;
+    private final StudentRepository StudentRepository;
+    private final CoursesRepository courseRepository;
 
     public List<ProgressionResponce> getAllProgression() {
         return progressionRepository.findAll()
@@ -20,10 +32,26 @@ public class ProgressionService {
                 .collect(Collectors.toList());
     }
 
-    public ProgressionResponce addProgression(ProgressionRequest request) {
-        Progression progression = progressionMapper.toProgression(request);
-        progression = progressionRepository.save(progression);
-        return progressionMapper.toProgressionResponce(progression);
+
+    public ProgressionResponce addProgression(
+            Integer studentId,
+            Integer contentId,
+            ProgressionRequest req
+    ) {
+        Student student = StudentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new RuntimeException("Content not found: " + contentId));
+
+        Progression p = new Progression();
+        p.setStudent(student);
+        p.setContentEnCours(content);
+        p.setProgressionPercentage(req.progressionPercentage());
+        p.setLastAccessed(req.lastAccessed());
+        p.setStatus(req.status());
+
+        p = progressionRepository.save(p);
+        return progressionMapper.toProgressionResponce(p);
     }
 
     public ProgressionResponce getProgressionById(int id) {
@@ -32,34 +60,73 @@ public class ProgressionService {
         return progressionMapper.toProgressionResponce(progressionExsist);
     }
 
-    public ProgressionResponce updateProgression(int id, ProgressionRequest request) {
-        var progressionExsist = progressionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Progression not found with id: " + id));
+    public ProgressionResponce updateProgression(
+            Integer studentId,
+            Integer contentId,
+            ProgressionRequest req
+    ) {
+        // find existing progression by student+content (or by its own id if you prefer)
+        Progression p = progressionRepository
+                .findByStudentIdAndContentEnCoursId(studentId, contentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "No progression for student=" + studentId + " content=" + contentId));
 
-        if (request.student() != null) {
-            progressionExsist.setStudent(request.student());
+        if (req.progressionPercentage() != null) {
+            p.setProgressionPercentage(req.progressionPercentage());
+        }
+        if (req.lastAccessed() != null) {
+            p.setLastAccessed(req.lastAccessed());
+        }
+        if (req.status() != null) {
+            p.setStatus(req.status());
         }
 
-        if (request.contentEnCours() != null) {
-            progressionExsist.setContentEnCours(request.contentEnCours());
-        }
-
-        if (request.progressionPercentage() != null) {
-            progressionExsist.setProgressionPercentage(request.progressionPercentage());
-        }
-
-        if (request.lastAccessed() != null) {
-            progressionExsist.setLastAccessed(request.lastAccessed());
-        }
-
-        if (request.status() != null) {
-            progressionExsist.setStatus(request.status());
-        }
-        progressionRepository.save(progressionExsist);
-        return progressionMapper.toProgressionResponce(progressionExsist);
+        progressionRepository.save(p);
+        return progressionMapper.toProgressionResponce(p);
     }
 
     public void deleteProgression(int id) {
-         progressionRepository.deleteById(id);
+        progressionRepository.deleteById(id);
     }
+
+    public List<ProgressionResponce> listByStudent(Integer studentId) {
+        return progressionRepository
+                .findAllByStudentId(studentId)
+                .stream()
+                .map(progressionMapper::toProgressionResponce)
+                .toList();
+    }
+
+    public List<CourseResponseProgress> listInProgressCoursesWithLastViewed(Integer studentId) {
+        List<Integer> courseIds = progressionRepository
+                .findDistinctCourseIdsByStudentIdAndStatusNot(studentId, ProgressionStatus.COMPLETED);
+
+        List<Courses> courses = courseRepository.findAllById(courseIds);
+
+        return courses.stream().map(course -> {
+            Optional<Progression> lastProgress = progressionRepository
+                    .findTopByStudentIdAndContentEnCoursCourseIdOrderByLastAccessedDesc(studentId, course.getId());
+
+            String lastTitle = lastProgress.map(p -> p.getContentEnCours().getTitle()).orElse("Unknown");
+            Integer lastId = lastProgress.map(p -> p.getContentEnCours().getId()).orElse(null);
+
+            return new CourseResponseProgress(
+                    course.getId(),
+                    course.getTitle(),
+                    course.getShortDescription(),
+                    course.getLevel(),
+                    course.getLanguage(),
+                    course.getCoverImage(),
+                    course.getCategorie().getNom(),
+                    course.getCategorie().getId(),
+                    course.getInstructor().getId(),
+                    course.getInstructor().getFirstName(),
+                    lastTitle,
+                    lastId
+            );
+
+        }).toList();
+    }
+
+
 }
