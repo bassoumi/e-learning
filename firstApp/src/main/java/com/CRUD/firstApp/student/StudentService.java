@@ -1,6 +1,8 @@
 package com.CRUD.firstApp.student;
 
 
+import com.CRUD.firstApp.instructors.Instructors;
+import com.CRUD.firstApp.instructors.InstructorsRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
@@ -8,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
@@ -19,10 +23,13 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final  StudentMapper studentMapper;
+    private final InstructorsRepository instructorRepository;
 
-    public StudentService(StudentRepository studentRepository, StudentMapper studentMapper ) {
+
+    public StudentService(StudentRepository studentRepository, StudentMapper studentMapper, InstructorsRepository instructorRepository) {
         this.studentRepository = studentRepository;
         this.studentMapper = studentMapper;
+        this.instructorRepository = instructorRepository;
     }
 
     public List<StudentResponse> getAllStudents() {
@@ -149,4 +156,64 @@ public class StudentService {
         return studentMapper.toResponse(studentRepository.findByEmail(email).get());
 
     }
+
+    //subscribe method :
+
+
+    public StudentResponse getSubscription(int studentId) {
+        var student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Étudiant introuvable (ID: " + studentId + ")"));
+
+        return studentMapper.toResponse(student);
+    }
+
+
+
+
+    public StudentResponse subscribeToInstructor(int studentId, int instructorId) {
+        var student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Étudiant introuvable (ID: " + studentId + ")"));
+
+        var instructor = instructorRepository.findById(instructorId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Instructeur introuvable (ID: " + instructorId + ")"));
+
+        // Ajouter l’instructeur à la liste
+        student.getInstructors().add(instructor);
+        studentRepository.save(student);
+
+        return studentMapper.toResponse(student);
+    }
+
+
+
+    public StudentResponse updateSubscription(int studentId, List<Integer> newInstructorIds) {
+        var student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Étudiant introuvable (ID: " + studentId + ")"));
+
+        Set<Instructors> newInstructors = new HashSet<>();
+        for (int id : newInstructorIds) {
+            var instructor = instructorRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Instructeur introuvable (ID: " + id + ")"));
+            newInstructors.add(instructor);
+        }
+
+        student.setInstructors(newInstructors);
+        studentRepository.save(student);
+
+        return studentMapper.toResponse(student);
+    }
+
+
+
+
+
+
+
+
+
 }

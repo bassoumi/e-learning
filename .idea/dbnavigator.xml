@@ -24,7 +24,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc">
-      <console name="psotgres_E-learning Connection" type="STANDARD" schema="public" session="Main"><![CDATA[DELETE FROM progression;]]></console>
+      <console name="psotgres_E-learning Connection" type="STANDARD" schema="public" session="Main"><![CDATA[ALTER TABLE "Student" DROP COLUMN "instructor_id";]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -32,9 +32,8 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/student" />
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/progression" />
       <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="consoles/psotgres_E-learning Connection" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/student" />
     </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">

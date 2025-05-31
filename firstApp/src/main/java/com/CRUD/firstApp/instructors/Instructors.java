@@ -4,6 +4,7 @@ package com.CRUD.firstApp.instructors;
 import com.CRUD.firstApp.auth.Role;
 import com.CRUD.firstApp.courses.Courses;
 
+import com.CRUD.firstApp.student.Student;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,9 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -42,6 +41,12 @@ public class Instructors implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
+
+
+    @ManyToMany(mappedBy = "instructors")
+    private Set<Student> subscribers = new HashSet<>();
+
+
 
     @Override
     public String getUsername() {

@@ -77,7 +77,32 @@ public class studentController {
 
     }
 
+// subscribe method
 
+
+    @GetMapping("/{studentId}/subscribe")
+    public StudentResponse getInstructorForStudent(@PathVariable int studentId) {
+        return studentService.getSubscription(studentId);
+    }
+
+    @PostMapping("/{studentId}/subscribe/{instructorId}")
+    public StudentResponse subscribeToInstructor(
+            @PathVariable int studentId,
+            @PathVariable int instructorId) {
+
+        return studentService.subscribeToInstructor(studentId, instructorId);
+    }
+
+
+    @PutMapping("/{studentId}/subscribe")
+    public StudentResponse updateSubscription(
+            @PathVariable int studentId,
+            @RequestBody @Valid SubscriptionRequest request) {
+
+        List<Integer> newInstructorIds = request.getInstructorIds();
+        return studentService.updateSubscription(studentId, newInstructorIds);
+
+    }
 
 
 }

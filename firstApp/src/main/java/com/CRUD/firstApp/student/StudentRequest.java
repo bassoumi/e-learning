@@ -3,7 +3,10 @@ package com.CRUD.firstApp.student;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
+
+import java.util.List;
 
 public record StudentRequest (
 
@@ -22,6 +25,9 @@ public record StudentRequest (
          Address address,
 
         @NotBlank(message = "password must not be empty")
-        String password
+        String password,
+
+        @NotEmpty(message = "Instructor IDs must not be empty")
+        List<@Positive(message = "Instructor ID must be positive") Integer> instructorIds
 ){
 }

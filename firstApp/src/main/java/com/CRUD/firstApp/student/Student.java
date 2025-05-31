@@ -3,6 +3,7 @@ package com.CRUD.firstApp.student;
 
 import com.CRUD.firstApp.auth.Role;
 import com.CRUD.firstApp.courses.Courses;
+import com.CRUD.firstApp.instructors.Instructors;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,11 +37,22 @@ public class Student implements UserDetails {
     @ManyToMany(mappedBy = "students")
     private Set<Courses> courses = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "student_instructor_subscription",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "instructor_id")
+    )
+    private Set<Instructors> instructors = new HashSet<>();
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
+
+
 
     @Override
     public String getPassword() {

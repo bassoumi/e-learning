@@ -6,6 +6,9 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class StudentMapper {
 
@@ -21,15 +24,20 @@ public class StudentMapper {
         return student;
     }
 
-    public StudentResponse toResponse(Student response) {
-        return  new StudentResponse(
-                response.getId(),
-                response.getFirstName(),
-                response.getLastName(),
-                response.getGender(),
-                response.getEmail()
-        );
+    public StudentResponse toResponse(Student student) {
+        List<Integer> instructorIds = student.getInstructors()
+                .stream()
+                .map(instructor -> Math.toIntExact(instructor.getId()))
+                .collect(Collectors.toList());
 
+        return new StudentResponse(
+                student.getId(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getGender(),
+                student.getEmail(),
+                instructorIds
+        );
     }
 
 
