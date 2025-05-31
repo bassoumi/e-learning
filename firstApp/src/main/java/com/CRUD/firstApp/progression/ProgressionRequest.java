@@ -12,4 +12,6 @@ public record ProgressionRequest(
         LocalDateTime lastAccessed,
         ProgressionStatus status
 ) {
+
+
 }

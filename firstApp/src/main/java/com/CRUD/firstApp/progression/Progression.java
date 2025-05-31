@@ -9,6 +9,10 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "content_en_cours_id"})
+)
 @Entity
 @Data
 public class Progression {

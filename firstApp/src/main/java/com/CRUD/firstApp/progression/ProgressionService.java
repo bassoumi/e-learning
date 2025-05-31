@@ -33,57 +33,12 @@ public class ProgressionService {
     }
 
 
-    public ProgressionResponce addProgression(
-            Integer studentId,
-            Integer contentId,
-            ProgressionRequest req
-    ) {
-        Student student = StudentRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
-        Content content = contentRepository.findById(contentId)
-                .orElseThrow(() -> new RuntimeException("Content not found: " + contentId));
-
-        Progression p = new Progression();
-        p.setStudent(student);
-        p.setContentEnCours(content);
-        p.setProgressionPercentage(req.progressionPercentage());
-        p.setLastAccessed(req.lastAccessed());
-        p.setStatus(req.status());
-
-        p = progressionRepository.save(p);
-        return progressionMapper.toProgressionResponce(p);
-    }
-
     public ProgressionResponce getProgressionById(int id) {
         var progressionExsist = progressionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Progression not found with id: " + id));
         return progressionMapper.toProgressionResponce(progressionExsist);
     }
 
-    public ProgressionResponce updateProgression(
-            Integer studentId,
-            Integer contentId,
-            ProgressionRequest req
-    ) {
-        // find existing progression by student+content (or by its own id if you prefer)
-        Progression p = progressionRepository
-                .findByStudentIdAndContentEnCoursId(studentId, contentId)
-                .orElseThrow(() -> new RuntimeException(
-                        "No progression for student=" + studentId + " content=" + contentId));
-
-        if (req.progressionPercentage() != null) {
-            p.setProgressionPercentage(req.progressionPercentage());
-        }
-        if (req.lastAccessed() != null) {
-            p.setLastAccessed(req.lastAccessed());
-        }
-        if (req.status() != null) {
-            p.setStatus(req.status());
-        }
-
-        progressionRepository.save(p);
-        return progressionMapper.toProgressionResponce(p);
-    }
 
     public void deleteProgression(int id) {
         progressionRepository.deleteById(id);
@@ -96,6 +51,74 @@ public class ProgressionService {
                 .map(progressionMapper::toProgressionResponce)
                 .toList();
     }
+
+
+    public ProgressionResponce addProgression(
+            Integer studentId,
+            Integer contentId,
+            ProgressionRequest req
+    ) {
+        Student student = StudentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new RuntimeException("Content not found: " + contentId));
+
+        // Vérifier si une progression existe déjà
+        Optional<Progression> existing = progressionRepository.findByStudentIdAndContentEnCoursId(studentId, contentId);
+        Progression p;
+        if (existing.isPresent()) {
+            // Mise à jour
+            p = existing.get();
+        } else {
+            // Création
+            p = new Progression();
+            p.setStudent(student);
+            p.setContentEnCours(content);
+        }
+
+        if (req.progressionPercentage() != null) {
+            p.setProgressionPercentage(req.progressionPercentage());
+        }
+        if (req.lastAccessed() != null) {
+            p.setLastAccessed(req.lastAccessed());
+        }
+        if (req.status() != null) {
+            p.setStatus(req.status());
+        }
+
+        p = progressionRepository.save(p);
+        return progressionMapper.toProgressionResponce(p);
+    }
+
+
+
+    public ProgressionResponce updateProgression(
+            Integer studentId,
+            Integer contentId,
+            ProgressionRequest req
+    ) {
+        Progression p = progressionRepository
+                .findByStudentIdAndContentEnCoursId(studentId, contentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "No progression for student=" + studentId + " content=" + contentId));
+
+        if (req.progressionPercentage() != null) {
+            // Stocke la valeur brute qu’on reçoit dans req, sans l’additionner à l’ancienne.
+            p.setProgressionPercentage(req.progressionPercentage());
+        }
+
+        if (req.lastAccessed() != null) {
+            p.setLastAccessed(req.lastAccessed());
+        }
+        if (req.status() != null) {
+            p.setStatus(req.status());
+        }
+
+        progressionRepository.save(p);
+        return progressionMapper.toProgressionResponce(p);
+    }
+
+
 
     public List<CourseResponseProgress> listInProgressCoursesWithLastViewed(Integer studentId) {
         List<Integer> courseIds = progressionRepository
@@ -110,6 +133,9 @@ public class ProgressionService {
             String lastTitle = lastProgress.map(p -> p.getContentEnCours().getTitle()).orElse("Unknown");
             Integer lastId = lastProgress.map(p -> p.getContentEnCours().getId()).orElse(null);
 
+            Double averageProgression = progressionRepository.calculateAverageProgression(studentId, course.getId());
+            if (averageProgression == null) averageProgression = 0.0;
+
             return new CourseResponseProgress(
                     course.getId(),
                     course.getTitle(),
@@ -122,11 +148,13 @@ public class ProgressionService {
                     course.getInstructor().getId(),
                     course.getInstructor().getFirstName(),
                     lastTitle,
-                    lastId
+                    lastId,
+                    averageProgression
             );
-
         }).toList();
     }
+
+
 
 
 }

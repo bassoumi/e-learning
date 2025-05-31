@@ -12,7 +12,8 @@ public record CourseResponseProgress(
         Integer instructorId,
         String instructorFirstName,
         String lastContentTitle,
-        Integer lastContentId
+        Integer lastContentId,
+        Double progressionPercentage
 ) {
 
 }

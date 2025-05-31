@@ -27,12 +27,6 @@ public class ProgressionContoller {
         return ResponseEntity.ok(list);
     }
 
-
-
-
-
-
-
     @GetMapping("/students/{studentId}/in-progress-courses")
     public ResponseEntity<List<CourseResponseProgress>> getInProgressCourses(
             @PathVariable Integer studentId
