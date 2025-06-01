@@ -5,7 +5,7 @@ import com.CRUD.firstApp.auth.Role;
 import com.CRUD.firstApp.courses.Courses;
 import com.CRUD.firstApp.instructors.Instructors;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,27 +15,31 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Data
-@Table(name="student")
+@Table(name = "student")
 public class Student implements UserDetails {
-
     @Id
     @GeneratedValue
+    @EqualsAndHashCode.Include
     private int id;
+
     private String firstName;
     private String lastName;
     private int age;
     private String gender;
     private String email;
     private String phone;
+
     @Embedded
     private Address address;
+
     private Role role;
     private String password;
-
-    @ManyToMany(mappedBy = "students")
-    private Set<Courses> courses = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -45,14 +49,13 @@ public class Student implements UserDetails {
     )
     private Set<Instructors> instructors = new HashSet<>();
 
-
+    @ManyToMany(mappedBy = "students")
+    private Set<Courses> courses = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
-
-
 
     @Override
     public String getPassword() {
@@ -61,7 +64,7 @@ public class Student implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email ;
+        return email;
     }
 
     @Override

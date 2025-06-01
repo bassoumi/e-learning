@@ -82,7 +82,10 @@ public class studentController {
 
     @GetMapping("/{studentId}/subscribe")
     public StudentResponse getInstructorForStudent(@PathVariable int studentId) {
-        return studentService.getSubscription(studentId);
+        System.out.println(">>> Début de GET /students/" + studentId + "/subscribe");
+        StudentResponse response = studentService.getSubscription(studentId);
+        System.out.println("<<< Fin de GET, réponse envoyée : " + response);
+        return response;
     }
 
     @PostMapping("/{studentId}/subscribe/{instructorId}")
@@ -102,6 +105,16 @@ public class studentController {
         List<Integer> newInstructorIds = request.getInstructorIds();
         return studentService.updateSubscription(studentId, newInstructorIds);
 
+    }
+
+    @DeleteMapping("/{studentId}/subscribe/{instructorId}")
+    public ResponseEntity<Void> unsubscribeFromInstructor(
+            @PathVariable int studentId,
+            @PathVariable int instructorId) {
+
+        studentService.unsubscribeFromInstructor(studentId, instructorId);
+        // Répond un 204 No Content (body vide) pour indiquer que tout s’est bien passé
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -46,7 +46,7 @@ public class ProgressionService {
 
     public List<ProgressionResponce> listByStudent(Integer studentId) {
         return progressionRepository
-                .findAllByStudentId(studentId)
+                .findAllByStudent_Id(studentId)
                 .stream()
                 .map(progressionMapper::toProgressionResponce)
                 .toList();
@@ -64,7 +64,7 @@ public class ProgressionService {
                 .orElseThrow(() -> new RuntimeException("Content not found: " + contentId));
 
         // Vérifier si une progression existe déjà
-        Optional<Progression> existing = progressionRepository.findByStudentIdAndContentEnCoursId(studentId, contentId);
+        Optional<Progression> existing = progressionRepository.findByStudent_IdAndContentEnCours_Id(studentId, contentId);
         Progression p;
         if (existing.isPresent()) {
             // Mise à jour
@@ -98,7 +98,7 @@ public class ProgressionService {
             ProgressionRequest req
     ) {
         Progression p = progressionRepository
-                .findByStudentIdAndContentEnCoursId(studentId, contentId)
+                .findByStudent_IdAndContentEnCours_Id(studentId, contentId)
                 .orElseThrow(() -> new RuntimeException(
                         "No progression for student=" + studentId + " content=" + contentId));
 

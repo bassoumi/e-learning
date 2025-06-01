@@ -7,23 +7,25 @@ import com.CRUD.firstApp.courses.Courses;
 import com.CRUD.firstApp.student.Student;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
-
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
+@Table(name = "instructors")
 public class Instructors implements UserDetails {
     @Id
     @GeneratedValue
+    @EqualsAndHashCode.Include
     private int id;
+
     private String firstName;
     private String lastName;
     private String email;
@@ -32,21 +34,17 @@ public class Instructors implements UserDetails {
     private String password;
     private Role role;
 
+    @ManyToMany(mappedBy = "instructors")
+    private Set<Student> students = new HashSet<>();
 
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ToString.Exclude
     private List<Courses> courses = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
-
-
-    @ManyToMany(mappedBy = "instructors")
-    private Set<Student> subscribers = new HashSet<>();
-
-
 
     @Override
     public String getUsername() {
@@ -77,4 +75,5 @@ public class Instructors implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

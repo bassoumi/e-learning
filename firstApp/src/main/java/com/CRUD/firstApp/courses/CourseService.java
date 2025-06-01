@@ -164,7 +164,7 @@ public class CourseService {
     }
 
     public List<CourseResponse> getCoursesByCategory(int categoryId) {
-        List<Courses> courses = coursesRepository.findByCategorieId(categoryId);
+        List<Courses> courses = coursesRepository.findByCategorie_Id(categoryId);
         return courses.stream()
                 .map(CourseMapper::toResponceCourses)
                 .collect(Collectors.toList());
@@ -173,7 +173,7 @@ public class CourseService {
 
 
     public List<CourseResponse> getCoursesByInstructor(int instructorId) {
-        List<Courses> courses = coursesRepository.findByInstructorId(instructorId);
+        List<Courses> courses = coursesRepository.findByInstructor_Id(instructorId);
         return courses.stream()
                 .map(CourseMapper::toResponceCourses)
                 .collect(Collectors.toList());

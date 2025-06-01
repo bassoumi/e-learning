@@ -3,10 +3,12 @@ package com.CRUD.firstApp.student;
 
 import com.CRUD.firstApp.instructors.Instructors;
 import com.CRUD.firstApp.instructors.InstructorsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,12 +34,12 @@ public class StudentService {
         this.instructorRepository = instructorRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<StudentResponse> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
                 .map(studentMapper::toResponse)
                 .collect(Collectors.toList());
-
     }
 
     public StudentResponse createStudent(StudentRequest studentRequest) {
@@ -46,8 +48,25 @@ public class StudentService {
         return studentMapper.toResponse(studentEntity);
     }
 
+    @Transactional(readOnly = true)
     public StudentResponse getStudentById(int id) {
-        return studentMapper.toResponse(studentRepository.findById(id).get());
+        Student student = studentRepository.findByIdWithInstructors(id)
+                .orElseThrow(() -> new EntityNotFoundException("Étudiant introuvable avec l’ID " + id));
+
+        // Vu qu'on a déjà fait JOIN FETCH, la collection instructors est déjà remplie
+        // On peut donc streamer directement sans copie si on veut :
+        List<Integer> instructorIds = student.getInstructors().stream()
+                .map(Instructors::getId)
+                .collect(Collectors.toList());
+
+        return new StudentResponse(
+                student.getId(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getGender(),
+                student.getEmail(),
+                instructorIds
+        );
     }
 
     public List<StudentResponse> getStudentsByName(String name) {
@@ -160,59 +179,148 @@ public class StudentService {
     //subscribe method :
 
 
+    @Transactional(readOnly = true)
     public StudentResponse getSubscription(int studentId) {
-        var student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Étudiant introuvable (ID: " + studentId + ")"));
+        System.out.println("→ getSubscription appelé pour studentId=" + studentId);
 
-        return studentMapper.toResponse(student);
+        // 1) Récupérer l’étudiant
+        Student student = studentRepository.findByIdWithInstructors(studentId)
+                .orElseThrow(() -> {
+                    System.out.println("!! Étudiant introuvable (ID: " + studentId + ")");
+                    return new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Étudiant introuvable (ID: " + studentId + ")"
+                    );
+                });
+        System.out.println("→ Étudiant récupéré : ID=" + student.getId() + ", firstName=" + student.getFirstName());
+
+        // 2) Extraire les IDs des instructors
+        List<Integer> instructorIds = student.getInstructors().stream()
+                .map(Instructors::getId)
+                .collect(Collectors.toList());
+        System.out.println("→ Liste des instructorIds = " + instructorIds);
+
+        // 3) Construire et renvoyer le DTO
+        StudentResponse dto = new StudentResponse(
+                student.getId(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getGender(),
+                student.getEmail(),
+                instructorIds
+        );
+        System.out.println("→ DTO créé : " + dto);
+
+        return dto;
     }
 
 
-
-
+    @Transactional
     public StudentResponse subscribeToInstructor(int studentId, int instructorId) {
-        var student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Étudiant introuvable (ID: " + studentId + ")"));
+        System.out.println("Début de subscribeToInstructor : studentId=" + studentId + ", instructorId=" + instructorId);
 
-        var instructor = instructorRepository.findById(instructorId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Instructeur introuvable (ID: " + instructorId + ")"));
+        // 1) On récupère le student AVEC tous ses instructors pré-chargés
+        Student student = studentRepository.findByIdWithInstructors(studentId)
+                .orElseThrow(() -> {
+                    System.out.println("Étudiant introuvable (ID: " + studentId + ")");
+                    return new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Étudiant introuvable (ID: " + studentId + ")"
+                    );
+                });
+        System.out.println("Student récupéré : ID=" + student.getId());
 
-        // Ajouter l’instructeur à la liste
+        // 2) On récupère l’instructor existant
+        Instructors instructor = instructorRepository.findById(instructorId)
+                .orElseThrow(() -> {
+                    System.out.println("Instructeur introuvable (ID: " + instructorId + ")");
+                    return new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Instructeur introuvable (ID: " + instructorId + ")"
+                    );
+                });
+        System.out.println("Instructor récupéré : ID=" + instructor.getId());
+
+        // 3) On modifie directement la collection pré-chargée
+        System.out.println("Avant ajout, nombre d'instructors = " + student.getInstructors().size());
         student.getInstructors().add(instructor);
-        studentRepository.save(student);
+        System.out.println("Après ajout, nombre d'instructors = " + student.getInstructors().size());
 
-        return studentMapper.toResponse(student);
+        // 4) Sauvegarde du Student (la relation many-to-many sera mise à jour)
+        System.out.println("Avant appel à studentRepository.save");
+        studentRepository.save(student);
+        System.out.println("Après appel à studentRepository.save");
+
+        // 5) On reconstruit le DTO, sachant que student.getInstructors() est déjà initialisée
+        StudentResponse response = studentMapper.toResponse(student);
+        System.out.println("Fin de subscribeToInstructor, DTO généré");
+
+        return response;
     }
 
 
 
-    public StudentResponse updateSubscription(int studentId, List<Integer> newInstructorIds) {
-        var student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Étudiant introuvable (ID: " + studentId + ")"));
 
+    @Transactional
+    public StudentResponse updateSubscription(int studentId, List<Integer> newInstructorIds) {
+        // 1) Récupérer le student AVEC ses instructors préchargés
+        Student student = studentRepository.findByIdWithInstructors(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Étudiant introuvable (ID: " + studentId + ")"
+                ));
+
+        // 2) Construire le nouvel ensemble d’instructeurs
         Set<Instructors> newInstructors = new HashSet<>();
         for (int id : newInstructorIds) {
-            var instructor = instructorRepository.findById(id)
+            Instructors instructor = instructorRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Instructeur introuvable (ID: " + id + ")"));
+                            HttpStatus.NOT_FOUND,
+                            "Instructeur introuvable (ID: " + id + ")"
+                    ));
             newInstructors.add(instructor);
         }
 
+        // 3) Remplacer entièrement la collection
         student.setInstructors(newInstructors);
+
+        // 4) Persister la mise à jour
         studentRepository.save(student);
 
+        // 5) Retourner le DTO (student.getInstructors() est déjà initialisée)
         return studentMapper.toResponse(student);
     }
 
 
 
+    @Transactional
+    public void unsubscribeFromInstructor(int studentId, int instructorId) {
+        // 1) Charger l’étudiant AVEC sa collection d’instructeurs
+        Student student = studentRepository
+                .findByIdWithInstructors(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Étudiant introuvable (ID: " + studentId + ")"
+                ));
 
+        // 2) Charger l’instructeur à retirer
+        Instructors instructor = instructorRepository
+                .findById(instructorId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Instructeur introuvable (ID: " + instructorId + ")"
+                ));
 
+        // 3) Retirer l’instructeur de la collection gérée (PersistentSet)
+        boolean removed = student.getInstructors().remove(instructor);
+        if (!removed) {
+            // Si l’instructeur n’était pas déjà dans la liste, on peut
+            // décider de renvoyer un 404 ou simplement ignorer. Ici, on ignore.
+        }
 
+        // 4) Hibernate va gérer le flush automatiquement (DELETE dans student_instructor_subscription)
+        //    au commit de la transaction. Pas besoin de studentRepository.save(student) explicite.
+    }
 
 
 

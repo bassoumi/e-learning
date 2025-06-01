@@ -10,11 +10,12 @@ import java.util.Optional;
 
 @Repository
 public interface ProgressionRepository extends JpaRepository<Progression, Integer> {
-    Optional<Progression> findByStudentIdAndContentEnCoursId(
-            Integer studentId,
-            Integer contentId);
 
-    List<Progression> findAllByStudentId(Integer studentId);
+
+    Optional<Progression> findByStudent_IdAndContentEnCours_Id(Integer studentId, Integer contentId);
+
+
+    List<Progression> findAllByStudent_Id(Integer studentId);
 
 
 
