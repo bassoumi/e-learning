@@ -3,6 +3,8 @@ package com.CRUD.firstApp.student;
 
 import com.CRUD.firstApp.instructors.Instructors;
 import com.CRUD.firstApp.instructors.InstructorsRepository;
+import com.CRUD.firstApp.notification.Notification;
+import com.CRUD.firstApp.notification.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -26,12 +28,14 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final  StudentMapper studentMapper;
     private final InstructorsRepository instructorRepository;
+    private final NotificationService notificationService ;
 
 
-    public StudentService(StudentRepository studentRepository, StudentMapper studentMapper, InstructorsRepository instructorRepository) {
+    public StudentService(StudentRepository studentRepository, StudentMapper studentMapper, InstructorsRepository instructorRepository, NotificationService notificationService) {
         this.studentRepository = studentRepository;
         this.studentMapper = studentMapper;
         this.instructorRepository = instructorRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -321,6 +325,29 @@ public class StudentService {
         // 4) Hibernate va gérer le flush automatiquement (DELETE dans student_instructor_subscription)
         //    au commit de la transaction. Pas besoin de studentRepository.save(student) explicite.
     }
+
+
+
+    @Transactional(readOnly = true)
+    public List<Notification> getUnreadNotifications(int studentId) {
+        return notificationService.getUnreadNotifications(studentId);
+    }
+
+
+    @Transactional
+    public void markNotificationAsRead(int studentId, Integer notificationId) {
+        // Vous pouvez vérifier que la notification appartient bien à cet étudiant
+        // (sinon lever une exception 403)
+        Notification n = notificationService.getById(notificationId);
+
+        if (n.getStudent().getId() != studentId) {
+            throw new RuntimeException("Cette notification n'appartient pas à l'étudiant " + studentId);
+        }
+
+        notificationService.markAsRead(notificationId);
+    }
+
+
 
 
 

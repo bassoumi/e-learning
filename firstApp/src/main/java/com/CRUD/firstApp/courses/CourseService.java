@@ -5,6 +5,7 @@ import com.CRUD.firstApp.Categorie.Categorie;
 import com.CRUD.firstApp.Categorie.CategorieService;
 import com.CRUD.firstApp.instructors.Instructors;
 import com.CRUD.firstApp.instructors.InstructorsService;
+import com.CRUD.firstApp.notification.NotificationService;
 import jakarta.validation.Valid;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
@@ -27,13 +28,15 @@ public class CourseService {
     private final CategorieService categorieService;
     private final InstructorsService instructorsService;
     private final CourseFileStorageService courseFileStorageService;
+    private final NotificationService notificationService;
 
-    public CourseService(CoursesRepository coursesRepository, CourseMapper courseMapper, CategorieService categorieService, InstructorsService instructorsService, CourseFileStorageService courseFileStorageService) {
+    public CourseService(CoursesRepository coursesRepository, CourseMapper courseMapper, CategorieService categorieService, InstructorsService instructorsService, CourseFileStorageService courseFileStorageService, NotificationService notificationService) {
         this.coursesRepository = coursesRepository;
         CourseMapper = courseMapper;
         this.categorieService = categorieService;
         this.instructorsService = instructorsService;
         this.courseFileStorageService = courseFileStorageService;
+        this.notificationService = notificationService;
     }
 
     public List<CourseResponse> getCourses() {
@@ -64,6 +67,7 @@ public class CourseService {
 
         // Persistance (inclut la M-to-M)
         Courses saved = coursesRepository.save(courseEntity);
+        notificationService.notifyNewCourseToSubscribers(saved);
 
         // Retour du DTO
         return CourseMapper.toResponceCourses(saved);

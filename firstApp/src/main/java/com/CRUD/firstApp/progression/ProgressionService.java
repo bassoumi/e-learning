@@ -1,12 +1,10 @@
 package com.CRUD.firstApp.progression;
 
 
+import com.CRUD.firstApp.agenda.AgendaService;
 import com.CRUD.firstApp.contentcourse.Content;
 import com.CRUD.firstApp.contentcourse.ContentRepository;
-import com.CRUD.firstApp.courses.CourseResponse;
-import com.CRUD.firstApp.courses.CourseResponseProgress;
-import com.CRUD.firstApp.courses.Courses;
-import com.CRUD.firstApp.courses.CoursesRepository;
+import com.CRUD.firstApp.courses.*;
 import com.CRUD.firstApp.student.Student;
 import com.CRUD.firstApp.student.StudentRepository;
 import lombok.AllArgsConstructor;
@@ -24,6 +22,7 @@ public class ProgressionService {
     private final ContentRepository contentRepository;
     private final StudentRepository StudentRepository;
     private final CoursesRepository courseRepository;
+    private final AgendaService agendaService;
 
     public List<ProgressionResponce> getAllProgression() {
         return progressionRepository.findAll()
@@ -63,14 +62,16 @@ public class ProgressionService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found: " + contentId));
 
+        // ➤ Sauvegarde de la date de début du cours dans l'agenda
+        Integer courseId = content.getCourse().getId();
+        agendaService.saveCourseStartDate(studentId, courseId);
+
         // Vérifier si une progression existe déjà
         Optional<Progression> existing = progressionRepository.findByStudent_IdAndContentEnCours_Id(studentId, contentId);
         Progression p;
         if (existing.isPresent()) {
-            // Mise à jour
             p = existing.get();
         } else {
-            // Création
             p = new Progression();
             p.setStudent(student);
             p.setContentEnCours(content);

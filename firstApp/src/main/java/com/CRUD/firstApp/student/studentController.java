@@ -1,16 +1,22 @@
 package com.CRUD.firstApp.student;
 
 
+import com.CRUD.firstApp.Categorie.Categorie;
+import com.CRUD.firstApp.courses.Courses;
+import com.CRUD.firstApp.instructors.Instructors;
+import com.CRUD.firstApp.notification.Notification;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jdk.jfr.Category;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Validated
 @RestController
@@ -114,6 +120,45 @@ public class studentController {
 
         studentService.unsubscribeFromInstructor(studentId, instructorId);
         // Répond un 204 No Content (body vide) pour indiquer que tout s’est bien passé
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{studentId}/notifications")
+    public ResponseEntity<List<NotificationDto>> getUnreadNotifications(@PathVariable int studentId) {
+        List<Notification> entities = studentService.getUnreadNotifications(studentId);
+
+        List<NotificationDto> dtos = entities.stream().map(n -> {
+            Courses course = n.getCourse();
+            Instructors instructor = course.getInstructor();
+            Categorie category = course.getCategorie(); // ou getCategoryName() selon ton modèle
+
+            return new NotificationDto(
+                    n.getId(),
+                    course.getId(),
+                    course.getTitle(),
+                    course.getShortDescription(),
+                    course.getLevel(),
+                    course.getLanguage(),
+                    instructor.getFirstName()+""+instructor.getLastName(), // ou getFirstName() + " " + getLastName()
+                    instructor.getId(),
+                    category.getNom(),
+                    category.getId(),
+                    course.getCoverImage(),
+                    n.getCreatedAt()
+            );
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+
+
+    @PutMapping("/{studentId}/notifications/{notificationId}/read")
+    public ResponseEntity<Void> markNotificationAsRead(
+            @PathVariable int studentId,
+            @PathVariable Integer notificationId) {
+
+        studentService.markNotificationAsRead(studentId, notificationId);
         return ResponseEntity.noContent().build();
     }
 

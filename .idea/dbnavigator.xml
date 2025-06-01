@@ -55,10 +55,8 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/student" />
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/student_instructor_subscription" />
       <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="consoles/psotgres_E-learning Connection" />
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/instructors" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/agenda" />
     </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
@@ -68,6 +66,7 @@
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.student_instructor_subscription" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.agenda" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.quiz" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.instructor_courses" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.instructors" active-filter-id="EMPTY_FILTER" />
