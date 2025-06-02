@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -18,16 +19,16 @@ public class Agenda {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private LocalDate studyDate;
+
     @ManyToOne
     private Student student;
 
     @ManyToOne
     private Courses course;
 
-    private LocalDateTime startedAt;
+    private LocalDateTime startedAt;              // When the student started studying that day
+    private LocalDateTime lastProgressionUpdate;  // Last update time that day
 
-    private LocalDateTime lastProgressionUpdate;
-
-    // Optionnel : pour gérer les rappels ou événements globaux plus tard
     private String eventType;
 }

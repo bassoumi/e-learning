@@ -10,6 +10,8 @@ import com.CRUD.firstApp.student.StudentRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,8 +52,6 @@ public class ProgressionService {
                 .map(progressionMapper::toProgressionResponce)
                 .toList();
     }
-
-
     public ProgressionResponce addProgression(
             Integer studentId,
             Integer contentId,
@@ -62,12 +62,13 @@ public class ProgressionService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found: " + contentId));
 
-        // ➤ Sauvegarde de la date de début du cours dans l'agenda
-        Integer courseId = content.getCourse().getId();
-        agendaService.saveCourseStartDate(studentId, courseId);
+        // 1) Toujours appeler logCourseProgress → crée ou met à jour l’agenda d’aujourd’hui
+        Courses course = content.getCourse();
+        agendaService.logCourseProgress(student, course);
 
-        // Vérifier si une progression existe déjà
-        Optional<Progression> existing = progressionRepository.findByStudent_IdAndContentEnCours_Id(studentId, contentId);
+        // 2) Récupérer / créer l’objet Progression comme d’habitude
+        Optional<Progression> existing = progressionRepository
+                .findByStudent_IdAndContentEnCours_Id(studentId, contentId);
         Progression p;
         if (existing.isPresent()) {
             p = existing.get();
@@ -77,20 +78,24 @@ public class ProgressionService {
             p.setContentEnCours(content);
         }
 
+        // 3) Mettre à jour les champs de progression
         if (req.progressionPercentage() != null) {
             p.setProgressionPercentage(req.progressionPercentage());
         }
         if (req.lastAccessed() != null) {
             p.setLastAccessed(req.lastAccessed());
+        } else {
+            p.setLastAccessed(LocalDateTime.now());
         }
         if (req.status() != null) {
             p.setStatus(req.status());
         }
 
+        // 4) Sauver la progression
         p = progressionRepository.save(p);
+
         return progressionMapper.toProgressionResponce(p);
     }
-
 
 
     public ProgressionResponce updateProgression(
@@ -100,24 +105,32 @@ public class ProgressionService {
     ) {
         Progression p = progressionRepository
                 .findByStudent_IdAndContentEnCours_Id(studentId, contentId)
-                .orElseThrow(() -> new RuntimeException(
-                        "No progression for student=" + studentId + " content=" + contentId));
+                .orElseThrow(() -> new RuntimeException("No progression found"));
 
+        // Mettre à jour les champs reçus
         if (req.progressionPercentage() != null) {
-            // Stocke la valeur brute qu’on reçoit dans req, sans l’additionner à l’ancienne.
             p.setProgressionPercentage(req.progressionPercentage());
         }
-
         if (req.lastAccessed() != null) {
             p.setLastAccessed(req.lastAccessed());
+        } else {
+            p.setLastAccessed(LocalDateTime.now());
         }
         if (req.status() != null) {
             p.setStatus(req.status());
         }
 
-        progressionRepository.save(p);
+        // Sauvegarder la progression
+        p = progressionRepository.save(p);
+
+        // Ensuite, log la progression du jour (UPDATE)
+        Courses course = p.getContentEnCours().getCourse();
+        Student student = p.getStudent();
+        agendaService.logCourseProgress(student, course);
+
         return progressionMapper.toProgressionResponce(p);
     }
+
 
 
 
