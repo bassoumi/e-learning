@@ -45,6 +45,12 @@ public class InstructorsService {
 
     }
 
+    public InstructorsResponce getInstructorProfileById(int id) {
+        Instructors instructor = instructorsRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Instructeur introuvable pour l'id " + id));
+        return instructorsMapper.toResponce(instructor);
+    }
 
 
     public List<InstructorsResponce> getInstructorsByName(String name) {

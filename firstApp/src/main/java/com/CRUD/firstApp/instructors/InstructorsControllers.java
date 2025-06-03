@@ -30,6 +30,12 @@ public class InstructorsControllers {
         return instructorsService.getInstructorById(id);
     }
 
+
+    @GetMapping("/{id}/profile")
+    public InstructorsResponce getInstructorProfileById(@PathVariable int id) {
+        return instructorsService.getInstructorProfileById(id);
+    }
+
     @GetMapping("name")
     public List<InstructorsResponce> getInstructorsByName(@RequestParam String name) {
         return instructorsService.getInstructorsByName(name);

@@ -109,35 +109,39 @@ public class AuthenticationService {
         // 3) Génère le JWT
         String jwtToken = jwtService.generateToken(userDetails);
 
-        // 4) Détermine l’entité (Admin ou Instructor ou Student) pour extraire son ID
+        // 4) Détermine l’entité (Admin ou Instructor ou Student) pour extraire son ID et rôle
         String email = userDetails.getUsername();
         int userId;
+        Role role;
 
-        // 4a) Si c’est un Admin (trouvé par email), retourne l’ID de l’admin
+        // 4a) Si c’est un Admin (trouvé par email), retourne l’ID et le rôle
         Optional<Admin> adminOpt = AdminRepository.findByEmail(email);
         if (adminOpt.isPresent()) {
             userId = adminOpt.get().getId();
-        }
-        else {
+            role = Role.ADMIN;
+        } else {
             // 4b) Sinon, si c’est un Instructor
             Optional<Instructors> instrOpt = InstructorsRepository.findByEmail(email);
             if (instrOpt.isPresent()) {
                 userId = instrOpt.get().getId();
-            }
-            else {
+                role = Role.INSTRUCTOR;
+            } else {
                 // 4c) Sinon, c’est un Student
                 Student student = StudentsRepository.findByEmail(email)
                         .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé pour l’email : " + email));
                 userId = student.getId();
+                role = Role.STUDENT;
             }
         }
 
-        // 5) Construit la réponse en ajoutant le token ET l’ID récupéré
+        // 5) Construit la réponse en ajoutant le token, l’ID et le rôle
         return AuthentificationResponse.builder()
                 .token(jwtToken)
                 .user_id(userId)
+                .role(role)
                 .build();
     }
+
 
 
 
