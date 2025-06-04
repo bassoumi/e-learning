@@ -119,15 +119,54 @@ public class CoursesController {
     }
 
     @DeleteMapping("/{id}")
-    public  ResponseEntity<String> deleteCourseById( @Valid @PathVariable int id) {
-         CourseService.deleteCourseById(id);
-         return ResponseEntity.ok("course with deleted with id "+id);
+    public ResponseEntity<String> deleteCourseById(@PathVariable int id) {
+        CourseService.deleteCourseById(id);
+        return ResponseEntity.ok("Course deleted with id " + id);
     }
 
+
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public CourseResponse updateCourse(@PathVariable int id, @ModelAttribute CoursRequest request) {
-        return CourseService.updateCourses(id, request);
+    public ResponseEntity<CourseResponse> updateCourse(
+            @PathVariable int id,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "shortDescription", required = false) String shortDescription,
+            @RequestParam(value = "categoryId", required = false) Integer categoryId,
+            @RequestParam(value = "level", required = false) String level,
+            @RequestParam(value = "language", required = false) String language,
+            @RequestParam(value = "instructorId", required = false) Integer instructorId,
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestPart(value = "metadata", required = false) MultipartFile metadataFile
+    ) throws IOException {
+        // --- Désérialisation JSON pour "metadata" si le fichier a été envoyé
+        CourseMetaDataRequest metaReq = null;
+        if (metadataFile != null && !metadataFile.isEmpty()) {
+            String metaJson = new String(metadataFile.getBytes(), StandardCharsets.UTF_8);
+            metaReq = objectMapper.readValue(metaJson, CourseMetaDataRequest.class);
+        }
+
+        // --- Construction du DTO CoursRequest : on ne prend PAS en compte "contents" ni "quiz"
+        CoursRequest coursRequest = new CoursRequest(
+                title,
+                description,
+                (shortDescription == null) ? "" : shortDescription,
+                categoryId,
+                (level == null) ? "" : level,
+                (language == null) ? "" : language,
+                instructorId,
+                null,         // contents = null
+                null,         // quiz = null
+                coverImage,   // coverImage éventuellement fourni
+                metaReq       // metadata éventuellement fourni
+        );
+
+        // --- Appel au service pour mettre à jour
+        CourseResponse updatedResponse = CourseService.updateCourses(id, coursRequest);
+
+        // --- Retour 200 OK avec le DTO mis à jour
+        return ResponseEntity.ok(updatedResponse);
     }
+
 
 
 }

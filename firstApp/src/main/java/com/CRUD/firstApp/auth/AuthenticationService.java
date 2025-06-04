@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -47,6 +48,7 @@ public class AuthenticationService {
     private final StudentRepository StudentsRepository;
     private final AdminRepository AdminRepository;
 
+    @Transactional
     public AuthentificationResponse registerInstructor(InstructorsRequest req) throws IOException {
         // 1) Gestion de l’upload du fichier
         MultipartFile imageFile = req.profileImage();
@@ -64,7 +66,6 @@ public class AuthenticationService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
 
-
         // 3) Création de l’entité Instructors et encodage du mot de passe
         Instructors instructor = new Instructors();
         instructor.setFirstName(req.firstName());
@@ -76,23 +77,26 @@ public class AuthenticationService {
         instructor.setRole(Role.INSTRUCTOR);
 
         // 4) Persistance
-        InstructorsRepository.save(instructor);
+        Instructors savedInstructor = InstructorsRepository.save(instructor);
 
         // 5) Envoi d’email de confirmation
         emailService.sendRegistrationConfirmationEmail(
-                instructor.getEmail(),
-                instructor.getFirstName(),
-                instructor.getLastName()
+                savedInstructor.getEmail(),
+                savedInstructor.getFirstName(),
+                savedInstructor.getLastName()
         );
 
         // 6) Génération du token JWT
-        String token = jwtService.generateToken(instructor);
+        String token = jwtService.generateToken(savedInstructor);
 
-        // 7) Réponse
+        // 7) Réponse : on renvoie maintenant le token, l’ID et le rôle
         return AuthentificationResponse.builder()
                 .token(token)
+                .user_id(savedInstructor.getId())     // ID généré par la BDD
+                .role(savedInstructor.getRole())      // Role.INSTRUCTOR
                 .build();
     }
+
 
     public AuthentificationResponse authenticate(AuthenticationRequest request) {
         // 1) Authentifie avec Spring Security
@@ -144,9 +148,10 @@ public class AuthenticationService {
 
 
 
-
-
+    // --- 1) Enregistrement d’un Student ---
+    @Transactional
     public AuthentificationResponse registerStudent(StudentRequest request) {
+        // 1.1) Création et sauvegarde de l’étudiant
         Student student = new Student();
         student.setFirstName(request.firstName());
         student.setLastName(request.lastName());
@@ -154,31 +159,45 @@ public class AuthenticationService {
         student.setGender(request.gender());
         student.setEmail(request.email());
         student.setPhone(request.phone());
-        student.setAddress(request.address()); // make sure Address object is set properly
+        student.setAddress(request.address()); // veillez à bien construire l’objet Address si nécessaire
         student.setPassword(passwordEncoder.encode(request.password()));
         student.setRole(Role.STUDENT);
-        StudentsRepository.save(student);
 
-        String token = jwtService.generateToken(student);
+        Student savedStudent = StudentsRepository.save(student);
+
+        // 1.2) Génération du JWT à partir de l’entité Student (qui implémente UserDetails)
+        String token = jwtService.generateToken(savedStudent);
+
+        // 1.3) Construction de la réponse en incluant token, user_id et role
         return AuthentificationResponse.builder()
                 .token(token)
+                .user_id(savedStudent.getId())   // on récupère l’ID généré par la BDD
+                .role(savedStudent.getRole())    // sera Role.STUDENT
                 .build();
     }
 
 
+    // --- 2) Enregistrement d’un Admin ---
+    @Transactional
     public AuthentificationResponse registerAdmin(AdminRequest request) {
+        // 2.1) Création et sauvegarde de l’admin
         Admin admin = new Admin();
         admin.setEmail(request.email());
         admin.setPassword(passwordEncoder.encode(request.password()));
         admin.setRole(Role.ADMIN);
-        AdminRepository.save(admin);
 
-        String token = jwtService.generateToken(admin);
+        Admin savedAdmin = AdminRepository.save(admin);
+
+        // 2.2) Génération du JWT à partir de l’entité Admin (qui implémente UserDetails)
+        String token = jwtService.generateToken(savedAdmin);
+
+        // 2.3) Construction de la réponse en incluant token, user_id et role
         return AuthentificationResponse.builder()
                 .token(token)
+                .user_id(savedAdmin.getId())   // on récupère l’ID généré par la BDD
+                .role(savedAdmin.getRole())    // sera Role.ADMIN
                 .build();
     }
-
 
 
 }

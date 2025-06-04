@@ -53,10 +53,10 @@ public class InstructorsService {
     }
 
 
-    public List<InstructorsResponce> getInstructorsByName(String name) {
-        var IntrucorsExsistng = instructorsRepository.findByFirstName(name);
+    public List<InstructorsResponce> getInstructorsByName(String firstName) {
+        var IntrucorsExsistng = instructorsRepository.findByFirstName(firstName);
         if (IntrucorsExsistng.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Instructor not found with name "+ name);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Instructor not found with name "+ firstName);
         }
         return IntrucorsExsistng.stream()
                 .map(instructorsMapper::toResponce)

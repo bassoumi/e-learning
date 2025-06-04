@@ -36,9 +36,9 @@ public class InstructorsControllers {
         return instructorsService.getInstructorProfileById(id);
     }
 
-    @GetMapping("name")
-    public List<InstructorsResponce> getInstructorsByName(@RequestParam String name) {
-        return instructorsService.getInstructorsByName(name);
+    @GetMapping("firstName")
+    public List<InstructorsResponce> getInstructorsByName(@RequestParam String firstName) {
+        return instructorsService.getInstructorsByName(firstName);
     }
 
     @GetMapping("email")
