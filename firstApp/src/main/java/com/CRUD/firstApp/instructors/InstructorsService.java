@@ -1,11 +1,19 @@
 package com.CRUD.firstApp.instructors;
 
 
+import com.CRUD.firstApp.contentcourse.Content;
+import com.CRUD.firstApp.contentcourse.ContentRepository;
+import com.CRUD.firstApp.courses.Courses;
 import com.CRUD.firstApp.courses.ResourceNotFoundException;
+import com.CRUD.firstApp.progression.ProgressionRepository;
+import com.CRUD.firstApp.student.Student;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import org.apache.catalina.util.StringUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,10 +31,14 @@ public class InstructorsService {
 
     private final InstructorsRepository instructorsRepository;
     private final InstructorsMapper instructorsMapper;
+    private final ContentRepository  contentRepository;
+    private final EntityManager entityManager;
 
-    public InstructorsService(InstructorsRepository instructorsRepository, InstructorsMapper instructorsMapper) {
+    public InstructorsService(InstructorsRepository instructorsRepository, InstructorsMapper instructorsMapper, ContentRepository contentRepository, EntityManager EntityManager, EntityManager entityManager) {
         this.instructorsRepository = instructorsRepository;
         this.instructorsMapper = instructorsMapper;
+        this.contentRepository = contentRepository;
+        this.entityManager = entityManager;
     }
 
 
@@ -45,11 +57,60 @@ public class InstructorsService {
 
     }
 
-    public InstructorsResponce getInstructorProfileById(int id) {
+    @Transactional
+    public void deleteInstructorById(int id) {
+
+
+        // 1. Charger l’instructeur
         Instructors instructor = instructorsRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Instructeur introuvable pour l'id " + id));
-        return instructorsMapper.toResponce(instructor);
+                .orElseThrow(() -> new EntityNotFoundException("Instructor not found with id " + id));
+
+        // 2. Pour chaque cours de l’instructeur
+        for (Courses course : instructor.getCourses()) {
+            // a. Supprimer les jointures course-étudiants
+            for (Student student : course.getStudents()) {
+                student.getCourses().remove(course);
+            }
+            course.getStudents().clear();
+
+            entityManager.createQuery("DELETE FROM Agenda a WHERE a.course.id = :courseId")
+                    .setParameter("courseId", course.getId())
+                    .executeUpdate();
+
+            
+            // b. Supprimer les jointures course-instructors (si bidirectionnelle)
+            entityManager.createNativeQuery("DELETE FROM instructor_courses WHERE course_id = :courseId")
+                    .setParameter("courseId", course.getId())
+                    .executeUpdate();
+
+            // c. Supprimer les contenus liés à ce cours
+            List<Content> contents = contentRepository.findByCourseId(course.getId()); // à implémenter
+
+            for (Content content : contents) {
+                // i. Supprimer les progressions liées à ce contenu
+                entityManager.createQuery("DELETE FROM Progression p WHERE p.contentEnCours.id = :contentId")
+                        .setParameter("contentId", content.getId())
+                        .executeUpdate();
+
+                // ii. Supprimer le contenu
+                entityManager.remove(entityManager.contains(content) ? content : entityManager.merge(content));
+            }
+        }
+
+        // 3. Supprimer les cours de l’instructeur (Cascade.ALL → supprime aussi les cours)
+        for (Courses course : instructor.getCourses()) {
+            entityManager.remove(entityManager.contains(course) ? course : entityManager.merge(course));
+        }
+        instructor.getCourses().clear();
+
+        // 4. Supprimer les jointures instructeur-étudiants
+        for (Student student : instructor.getStudents()) {
+            student.getInstructors().remove(instructor);
+        }
+        instructor.getStudents().clear();
+
+        // 5. Supprimer l’instructeur
+        instructorsRepository.delete(instructor);
     }
 
 
@@ -122,9 +183,7 @@ public class InstructorsService {
     }
 
 
-    public void deleteInstructor(int id) {
-         instructorsRepository.deleteById(id);
-    }
+
 
     public Instructors getInstructorsByEmail(String email) {
         return instructorsRepository
@@ -133,6 +192,27 @@ public class InstructorsService {
                         new UsernameNotFoundException("Instructor not found with email " + email)
                 );
     }
+
+    @Transactional
+    public void deleteInstructorProfileById(int id) {
+        // 1. Vérifier que l'instructeur existe
+        Instructors instructor = instructorsRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Instructeur introuvable pour l'id " + id));
+
+        // 2. Supprimer d'abord toutes les "progressions" (ou dépendances) liées à cet instructeur
+        //    Ici, on suppose que Progression possède un champ instructor (ManyToOne)
+
+        // 3. Puis supprimer l'instructeur lui‑même
+        instructorsRepository.delete(instructor);
+    }
+
+
+
+    public Long getSubscriberCountForInstructor(Integer instructorId) {
+        return instructorsRepository.countSubscribersByInstructorId(instructorId);
+    }
+
 
 }
 

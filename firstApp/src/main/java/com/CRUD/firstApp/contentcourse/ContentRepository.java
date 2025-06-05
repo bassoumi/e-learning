@@ -14,4 +14,6 @@ public interface ContentRepository extends JpaRepository<Content, Integer> {
     @Query("SELECT COUNT(c) FROM Content c WHERE c.course.id = :courseId")
     long countByCourseId(@Param("courseId") Integer courseId);
 
+    @Query("SELECT c FROM Content c WHERE c.course.id = :courseId")
+    List<Content> findByCourseId(@Param("courseId") int courseId);
 }

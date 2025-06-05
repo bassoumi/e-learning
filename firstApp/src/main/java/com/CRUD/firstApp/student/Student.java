@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Getter
@@ -57,6 +58,11 @@ public class Student implements UserDetails {
     // Le fait de mettre @JsonIgnore ici coupe la boucle côté « étudiant → instructeur ».
     @JsonIgnore
     private Set<Instructors> instructors = new HashSet<>();
+
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
 
     @ManyToMany(mappedBy = "students", fetch = FetchType.LAZY)
     // Courses est annoté lui aussi avec @JsonIdentityInfo (voir plus bas),

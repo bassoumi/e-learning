@@ -108,40 +108,79 @@ public class CourseService {
 
     @Transactional
     public void deleteCourseById(int id) {
-        // 1) Charger le Course (ou renvoyer 404 s’il n’existe pas)
+        // 1) Charger le Course (ou renvoyer 404)
         Courses course = coursesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Course not found with id " + id));
 
-        // 2) Purger d’abord toutes les lignes dans la table de jointure "instructor_courses".
-        //    → On utilise une requête SQL native, car on n’a pas d’entité JPA pour cette table.
-        //
-        //    ATTENTION : adaptez le nom exact de la colonne de jointure si ce n’est pas "cours_id".
-        //    D’après votre base, le join‐column dans instructor_courses doit s’appeler "cours_id".
+        // 2) Supprimer la jointure instructor_courses
         entityManager.createNativeQuery(
                         "DELETE FROM instructor_courses WHERE course_id = :courseId"
                 )
                 .setParameter("courseId", id)
                 .executeUpdate();
 
-        // 3) Détacher la relation Many-To-One vers l’instructeur (côté objet),
-        //    afin que la colonne instructor_id passe à NULL si besoin (reste cohérent).
+        // 3) Détacher l’instructeur (Many-To-One)
         Instructors instr = course.getInstructor();
         if (instr != null) {
             instr.getCourses().remove(course);
             course.setInstructor(null);
         }
 
-        // 4) Détacher la relation Many-To-Many vers les étudiants
+        // 4) Détacher les étudiants (Many-To-Many)
         for (Student stu : course.getStudents()) {
             stu.getCourses().remove(course);
         }
         course.getStudents().clear();
 
-        // 5) Supprimer enfin le Course
+        // ─────────────────────────────────────────────────────────────────
+        // 5a) Récupérer la liste des IDs de tous les Content liés à ce Course
+        @SuppressWarnings("unchecked")
+        List<Integer> contentIds = entityManager.createQuery(
+                        "SELECT c.id FROM Content c WHERE c.course.id = :courseId"
+                )
+                .setParameter("courseId", id)
+                .getResultList();
+
+        if (!contentIds.isEmpty()) {
+            // 5b) SUPPRIMER toutes les Progression liées à ces contenus
+            entityManager.createQuery(
+                            "DELETE FROM Progression p WHERE p.contentEnCours.id IN :ids"
+                    )
+                    .setParameter("ids", contentIds)
+                    .executeUpdate();
+
+            // 5c) SUPPRIMER les Content eux-mêmes
+            entityManager.createNativeQuery(
+                            "DELETE FROM content WHERE course_id = :courseId"
+                    )
+                    .setParameter("courseId", id)
+                    .executeUpdate();
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // 6) SUPPRIMER toutes les Notifications liées à ce Course
+        entityManager.createQuery(
+                        "DELETE FROM Notification n WHERE n.course.id = :courseId"
+                )
+                .setParameter("courseId", id)
+                .executeUpdate();
+
+        // ─────────────────────────────────────────────────────────────────
+        // 7) SUPPRIMER toutes les entrées d’Agenda liées à ce Course
+        entityManager.createQuery(
+                        "DELETE FROM Agenda a WHERE a.course.id = :courseId"
+                )
+                .setParameter("courseId", id)
+                .executeUpdate();
+
+        // ─────────────────────────────────────────────────────────────────
+        // 8) Enfin, supprimer le Course lui-même
         coursesRepository.delete(course);
-        //    —> Hibernate flushera les entités et ne remontera plus d’erreur FK,
-        //        car la jointure "instructor_courses" a déjà été vidée.
     }
+
+
+
+
 
     @Transactional
     public CourseResponse updateCourses(int id, CoursRequest request) {

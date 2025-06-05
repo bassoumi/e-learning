@@ -31,10 +31,7 @@ public class InstructorsControllers {
     }
 
 
-    @GetMapping("/{id}/profile")
-    public InstructorsResponce getInstructorProfileById(@PathVariable int id) {
-        return instructorsService.getInstructorProfileById(id);
-    }
+
 
     @GetMapping("firstName")
     public List<InstructorsResponce> getInstructorsByName(@RequestParam String firstName) {
@@ -60,10 +57,16 @@ public class InstructorsControllers {
         return instructorsService.updateInstructor(id, request);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteInstructor(@PathVariable int id) {
-         instructorsService.deleteInstructor(id);
-         return new ResponseEntity<>("Instructor Deleted with id " + id, HttpStatus.OK);
+    @DeleteMapping("/{id}/profile")
+    public ResponseEntity<Void> deleteInstructorById(@PathVariable int id) {
+        instructorsService.deleteInstructorById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/subscribers/count")
+    public ResponseEntity<Long> getSubscriberCount(@PathVariable("id") Integer id) {
+        Long count = instructorsService.getSubscriberCountForInstructor(id);
+        return ResponseEntity.ok(count);
     }
 
 

@@ -170,5 +170,15 @@ public class ProgressionService {
 
 
 
+    public double getGlobalCompletionRate() {
+        long total = progressionRepository.count();
+        if (total == 0) {
+            return 0.0;
+        }
+        long completed = progressionRepository.countByStatus(ProgressionStatus.COMPLETED); // <-- passez l'enum, pas une chaîne
+        double rate = (completed * 100.0) / total;
+        return Math.round(rate * 100.0) / 100.0;
+    }
+
 
 }

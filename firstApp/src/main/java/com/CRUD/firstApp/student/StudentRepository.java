@@ -19,6 +19,9 @@ public interface StudentRepository extends JpaRepository <Student, Integer> {
     Optional<Student> findByIdWithInstructors(@Param("id") int id);
 
 
+    @Query("SELECT FUNCTION('TO_CHAR', s.createdAt, 'YYYY-MM') AS month, COUNT(s) AS count " +
+            "FROM Student s GROUP BY FUNCTION('TO_CHAR', s.createdAt, 'YYYY-MM') ORDER BY month")
+    List<Object[]> getMonthlyRegistrationStats();
 
 
 }
