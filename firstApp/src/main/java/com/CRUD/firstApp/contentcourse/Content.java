@@ -2,8 +2,13 @@ package com.CRUD.firstApp.contentcourse;
 
 
 import com.CRUD.firstApp.courses.Courses;
+import com.CRUD.firstApp.feedback.Commentaire;
+import com.CRUD.firstApp.feedback.Like;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,6 +27,14 @@ public class Content {
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Courses course;
+
+
+    @OneToMany(mappedBy = "contenuCours", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "contenuCours", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Commentaire> commentaires = new ArrayList<>();
+
 
 
 }
