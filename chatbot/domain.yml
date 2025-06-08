@@ -1,0 +1,31 @@
+# chatbot/domain.yml
+
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - ask_courses
+  - ask_schedule
+  - ask_help
+  - register
+  - thanks
+
+responses:
+  utter_greet:
+    - text: "Hello! Welcome to our e-learning platform. How can I help you?"
+  utter_goodbye:
+    - text: "See you soon! Feel free to come back if you have any other questions. 👋"
+  utter_ask_courses_fallback:
+    - text: "Désolé, je ne parviens pas à accéder aux cours pour le moment."
+  utter_ask_schedule:
+    - text: "Courses are available 24/7. Some have live sessions, would you like the schedule?"
+  utter_ask_help:
+    - text: "I can help you register, understand courses, ou résoudre un problème technique."
+  utter_register:
+    - text: "To register, please provide your name and email address. I'm here to guide you."
+  utter_thanks:
+    - text: "You're welcome! 😊"
+
+actions:
+  - action_list_courses

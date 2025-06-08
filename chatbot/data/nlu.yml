@@ -1,0 +1,50 @@
+version: "3.1"
+
+nlu:
+  - intent: greet
+    examples: |
+      - hi
+      - hello
+      - hey
+      - good morning
+
+  - intent: goodbye
+    examples: |
+      - goodbye
+      - bye
+      - see you later
+      - take care
+
+  - intent: ask_courses
+    examples: |
+      - what courses do you offer?
+      - I want to see the courses
+      - do you have computer science courses?
+      - show me the available courses
+
+  - intent: ask_schedule
+    examples: |
+      - when do the courses start?
+      - what's the schedule?
+      - what time are the courses?
+      - schedule of sessions?
+
+  - intent: ask_help
+    examples: |
+      - I need help
+      - can you help me?
+      - I don't understand
+      - I'm lost
+
+  - intent: register
+    examples: |
+      - I want to register
+      - how to register?
+      - help me sign up
+      - I want to create an account
+
+  - intent: thanks
+    examples: |
+      - thanks
+      - that's kind
+      - thank you very much
