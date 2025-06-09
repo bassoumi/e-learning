@@ -11,10 +11,15 @@ stories:
       - intent: goodbye
       - action: utter_goodbye
 
-  - story: ask about courses
+  - story: ask about new courses
     steps:
-      - intent: ask_courses
+      - intent: ask_new_courses
       - action: action_list_courses
+
+  - story: ask courses by level
+    steps:
+      - intent: ask_courses_by_level
+      - action: action_list_courses_by_level
 
 
   - story: ask about schedule

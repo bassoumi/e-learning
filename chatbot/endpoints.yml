@@ -1,2 +1,4 @@
+# endpoints.yml
 action_endpoint:
-  url: "http://localhost:5055/webhook"
+  url: "http://host.docker.internal:5055/webhook"
+

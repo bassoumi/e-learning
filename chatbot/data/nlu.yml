@@ -15,12 +15,18 @@ nlu:
       - see you later
       - take care
 
-  - intent: ask_courses
+  - intent: ask_new_courses
     examples: |
-      - what courses do you offer?
-      - I want to see the courses
-      - do you have computer science courses?
-      - show me the available courses
+      - could you list this week’s new courses?
+      - show me the new courses
+      
+
+  - intent: ask_courses_by_level
+    examples: |
+      - Do you have any beginner courses?
+      - Are there any intermediate classes?
+
+
 
   - intent: ask_schedule
     examples: |

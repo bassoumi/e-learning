@@ -45,6 +45,7 @@ public class SecurityConfiguration {
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
+                                "/api/chat/**",
                                 "/api/v1/courses",
                                 "/uploads/**",
                                 "/api/v1/auth/**",

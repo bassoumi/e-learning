@@ -28,5 +28,9 @@ spring:
           starttls:
             enable: false
 
+rasa:
+  url: http://localhost:5006
+
+
 
 

@@ -1,6 +1,9 @@
-
+version: "3.8"
 
 services:
+  # ----------------------
+  # 1. Base de données PostgreSQL
+  # ----------------------
   postgres-db:
     image: postgres:15
     container_name: postgres-db
@@ -12,6 +15,52 @@ services:
       - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # ----------------------
+  # 2. Service Rasa (bot principal)
+  # ----------------------
+  rasa:
+    image: rasa/rasa:latest-full
+    container_name: rasa
+    restart: always
+    ports:
+      - "5005:5005"
+    # Expose l'API REST de Rasa sur le port 5005 de la machine hôte
+    volumes:
+      # Monte l'intégralité de votre projet Rasa local (nlu.yml, domain.yml, data/, actions/, etc.)
+      - ./chatbot/:/app
+      - ./chatbot/models/:/app/models
+      - ./chatbot/endpoints.yml:/app/endpoints.yml
+      - ./chatbot/credentials.yml:/app/credentials.yml
+    command: >
+      sh -c "
+      # (Optionnel) Entraînement automatique du modèle à chaque démarrage
+      rasa train --quiet &&
+      # Lancement du serveur Rasa avec l'API REST activée et CORS autorisé
+      rasa run --enable-api --cors \"*\" --port 5005
+      "
+    depends_on:
+      - action_server
+
+  # ----------------------
+  # 3. Serveur d’actions Rasa SDK
+  # ----------------------
+  action_server:
+    # Si requests ou d'autres dépendances manquent, utilisez le Dockerfile expliqué plus bas.
+    image: rasa/rasa-sdk:latest
+    container_name: rasa_actions
+    restart: always
+    ports:
+      - "5055:5055"     # Expose le serveur d’actions sur le port 5055 de la machine hôte
+    volumes:
+      # Monte votre dossier local contenant actions.py → /app/actions dans le conteneur
+      - ./chatbot/actions/:/app/actions
+    command: >
+      sh -c "
+      rasa run actions --port 5055
+      "
+    depends_on:
+      - postgres-db
 
 volumes:
   pgdata:

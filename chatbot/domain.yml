@@ -5,11 +5,23 @@ version: "3.1"
 intents:
   - greet
   - goodbye
-  - ask_courses
+  - ask_new_courses
+  - ask_courses_by_level
   - ask_schedule
   - ask_help
   - register
   - thanks
+
+
+
+entities:
+  - level
+
+
+slots:
+  requested_level:           # ← added
+    type: text
+    influence_conversation: false
 
 responses:
   utter_greet:
@@ -29,3 +41,4 @@ responses:
 
 actions:
   - action_list_courses
+  - action_list_courses_by_level
