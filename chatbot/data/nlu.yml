@@ -1,6 +1,8 @@
 version: "3.1"
 
 nlu:
+
+
   - intent: greet
     examples: |
       - hi
@@ -19,14 +21,17 @@ nlu:
     examples: |
       - could you list this week’s new courses?
       - show me the new courses
-      
 
   - intent: ask_courses_by_level
     examples: |
-      - Do you have any beginner courses?
-      - Are there any intermediate classes?
+      - Do you have any [beginner](level) courses?
+      - Are there any [intermediate](level) classes?
 
-
+  - lookup: level
+    examples: |
+      - beginner
+      - intermediate
+      - advanced
 
   - intent: ask_schedule
     examples: |

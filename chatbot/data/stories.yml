@@ -1,43 +1,4 @@
-version: "3.1"
-
-stories:
-  - story: simple greeting
-    steps:
-      - intent: greet
-      - action: utter_greet
-
-  - story: say goodbye
-    steps:
-      - intent: goodbye
-      - action: utter_goodbye
-
-  - story: ask about new courses
-    steps:
-      - intent: ask_new_courses
-      - action: action_list_courses
-
-  - story: ask courses by level
-    steps:
-      - intent: ask_courses_by_level
-      - action: action_list_courses_by_level
-
-
-  - story: ask about schedule
-    steps:
-      - intent: ask_schedule
-      - action: utter_ask_schedule
-
-  - story: ask for help
-    steps:
-      - intent: ask_help
-      - action: utter_ask_help
-
-  - story: registration
-    steps:
-      - intent: register
-      - action: utter_register
-
-  - story: thank you
-    steps:
-      - intent: thanks
-      - action: utter_thanks
+- story: list courses by level
+  steps:
+    - intent: ask_courses_by_level
+    - action: action_list_courses_by_level

@@ -12,16 +12,17 @@ intents:
   - register
   - thanks
 
-
-
 entities:
   - level
 
-
 slots:
-  requested_level:           # ← added
+  level:
     type: text
-    influence_conversation: false
+    influence_conversation: true
+
+
+
+
 
 responses:
   utter_greet:
@@ -36,9 +37,22 @@ responses:
     - text: "I can help you register, understand courses, ou résoudre un problème technique."
   utter_register:
     - text: "To register, please provide your name and email address. I'm here to guide you."
+  utter_ask_level:
+    - text: "Please tell me which level you’d like: beginner, intermediate or advanced."
+
   utter_thanks:
     - text: "You're welcome! 😊"
 
+synonyms:
+  Beginner: beginner
+  beginner: beginner
+  Intermediate: intermediate
+  intermediate: intermediate
+  Advanced: advanced
+  advanced: advanced
+
+
+
 actions:
-  - action_list_courses
+  - action_list_new_courses
   - action_list_courses_by_level
