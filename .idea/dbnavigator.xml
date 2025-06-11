@@ -55,6 +55,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/content" />
       <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/courses" />
     </open-files>
   </component>

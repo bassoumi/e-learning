@@ -1,0 +1,6 @@
+[
+  {
+    "name": "level",
+    "pattern": "(\\bbeginner\\b|\\bintermediate\\b|\\badvanced\\b)"
+  }
+]

@@ -2,30 +2,71 @@ version: "3.1"
 
 nlu:
 
-
   - intent: greet
     examples: |
       - hi
       - hello
       - hey
+      - hey there
       - good morning
+      - good afternoon
+      - good evening
+      - greetings
+      - yo
+      - what’s up
+      - howdy
+
+  - intent: ask_how_are_you
+    examples: |
+      - how are you?
+      - how are you doing?
+      - how’s it going?
+      - what’s up with you?
+      - how are things?
+      - how have you been?
+      - how do you feel?
+      - are you doing well?
+      - everything okay?
+      - how’s your day so far?
 
   - intent: goodbye
     examples: |
       - goodbye
       - bye
       - see you later
+      - see ya
       - take care
+      - catch you later
+      - talk to you soon
+      - farewell
+      - good night
+      - I’m off
 
   - intent: ask_new_courses
     examples: |
       - could you list this week’s new courses?
       - show me the new courses
+      - what new courses are available?
+      - any new courses this week?
+      - list the latest courses
+      - what courses were just released?
+      - are there any fresh courses?
+      - what’s new in the course catalog?
+      - when were the newest courses added?
+      - show me recently added courses
 
   - intent: ask_courses_by_level
     examples: |
       - Do you have any [beginner](level) courses?
       - Are there any [intermediate](level) classes?
+      - Show me all [advanced](level) courses.
+      - I want [beginner](level) courses.
+      - List your [intermediate](level) offerings.
+      - What [advanced](level) courses do you offer?
+      - Any [beginner](level) modules available?
+      - Looking for [intermediate](level) training.
+      - Do you offer [advanced](level) workshops?
+      - Find me some [beginner](level) lessons.
 
   - lookup: level
     examples: |
@@ -33,29 +74,33 @@ nlu:
       - intermediate
       - advanced
 
-  - intent: ask_schedule
+  - intent: ask_about_courses
     examples: |
       - when do the courses start?
-      - what's the schedule?
       - what time are the courses?
-      - schedule of sessions?
-
-  - intent: ask_help
-    examples: |
-      - I need help
-      - can you help me?
-      - I don't understand
-      - I'm lost
-
-  - intent: register
-    examples: |
-      - I want to register
-      - how to register?
-      - help me sign up
-      - I want to create an account
+      - when does a course begin?
+      - at what time does the next course start?
+      - when is the next course session?
+      - when will the course sessions commence?
+      - what’s the schedule for course start times?
+      - when can I start my course?
+      - how soon can I begin a course?
+      - when are the live classes scheduled?
+      - what time do classes kick off?
+      - when do enrollments open for courses?
+      - when does the upcoming course launch?
+      - when is the first session of the course?
+      - what date do courses start?
 
   - intent: thanks
     examples: |
       - thanks
-      - that's kind
+      - thank you
       - thank you very much
+      - that’s kind of you
+      - much appreciated
+      - thanks a lot
+      - many thanks
+      - cheers
+      - appreciate it
+      - you’re the best

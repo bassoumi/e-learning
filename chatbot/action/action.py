@@ -1,5 +1,3 @@
-# chatbot/actions/actions.py
-
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -71,7 +69,11 @@ class ActionListNewCourses(Action):
             title = course.get("title", "Untitled Course")
             category = course.get("categoryName", "Unspecified Category")
             instructor = course.get("instructorNames", "Unspecified Instructor")
-            message += f"• **{title}** (Category: {category} | Instructor: {instructor})\n"
+            short_desc = course.get("shortDescription", "No description available.")
+            message += (
+                f"**{title}**, in the “{category}” category, taught by the renowned {instructor}, "
+                f"    This course is described as: {short_desc}\n"
+            )
 
         dispatcher.utter_message(text=message.strip())
         return []
@@ -127,7 +129,11 @@ class ActionListCoursesByLevel(Action):
 
         lines = [f"We have {len(matched)} {wanted} course{'s' if len(matched) > 1 else ''} available:"]
         for c in matched:
-            lines.append(f"• **{c.get('title')}** (Category: {c.get('categoryName')} | Instructor: {c.get('instructorNames')})")
+            lines.append(
+                f" **{c.get('title')}**, in the “{c.get('categoryName')}” category, taught by {c.get('instructorNames')}, "
+                f"is described as: {c.get('shortDescription', 'No description available.')}"
+            )
+
 
         dispatcher.utter_message(text="\n".join(lines))
         return []

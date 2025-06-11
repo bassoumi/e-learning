@@ -1,15 +1,11 @@
-# chatbot/domain.yml
-
 version: "3.1"
-
 intents:
   - greet
   - goodbye
   - ask_new_courses
   - ask_courses_by_level
-  - ask_schedule
-  - ask_help
-  - register
+  - ask_how_are_you
+  - ask_about_courses
   - thanks
 
 entities:
@@ -19,6 +15,7 @@ slots:
   level:
     type: text
     influence_conversation: true
+    mappings: []
 
 
 
@@ -26,22 +23,26 @@ slots:
 
 responses:
   utter_greet:
-    - text: "Hello! Welcome to our e-learning platform. How can I help you?"
+    - text: "Hello! 👋 Welcome to our e-learning platform, your hub for discovering new skills and knowledge. How can I assist you today? 😊"
+
   utter_goodbye:
-    - text: "See you soon! Feel free to come back if you have any other questions. 👋"
-  utter_ask_courses_fallback:
-    - text: "Désolé, je ne parviens pas à accéder aux cours pour le moment."
-  utter_ask_schedule:
-    - text: "Courses are available 24/7. Some have live sessions, would you like the schedule?"
-  utter_ask_help:
-    - text: "I can help you register, understand courses, ou résoudre un problème technique."
-  utter_register:
-    - text: "To register, please provide your name and email address. I'm here to guide you."
+    - text: "Goodbye for now! 👋 Remember, our courses are here whenever you’re ready to continue your learning journey. See you soon! 🌟"
+
+
+  utter_ask_about_courses:
+    - text: "
+        To start a course, just click on the course you’re interested in, then press the “Start” button to dive in! 🎉  
+        Each course has a specific duration, which you can check in the course description on the details page. 📚  
+        Enjoy your learning adventure! 🚀"
+
+  utter_ask_how_are_you:
+    - text: "I’m doing great, thank you for asking! 🤖 I’m here and excited to help you learn and explore all the new features of our platform. How can I support you today? 😊"
+
   utter_ask_level:
-    - text: "Please tell me which level you’d like: beginner, intermediate or advanced."
+    - text: "Which level would you like to explore: beginner 🐣, intermediate 🏗️, or advanced 🚀? Let me know, and I’ll show you the available courses! 📖"
 
   utter_thanks:
-    - text: "You're welcome! 😊"
+    - text: "You’re very welcome! 😊 If you have any more questions or need further assistance, I’m always here to help. 👍"
 
 synonyms:
   Beginner: beginner

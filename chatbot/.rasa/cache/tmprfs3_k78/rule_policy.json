@@ -1,0 +1,22 @@
+{
+  "lookup": {
+    "rules": {
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_new_courses\"}}]": "action_list_new_courses",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_new_courses\"}}, {\"prev_action\": {\"action_name\": \"action_list_new_courses\"}, \"user\": {\"intent\": \"ask_new_courses\"}}]": "action_listen",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_courses_by_level\"}}]": "action_list_courses_by_level",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_courses_by_level\"}}, {\"prev_action\": {\"action_name\": \"action_list_courses_by_level\"}, \"user\": {\"intent\": \"ask_courses_by_level\"}}]": "action_listen"
+    },
+    "rule_only_slots": [],
+    "rule_only_loops": [],
+    "rules_for_loop_unhappy_path": {},
+    "rules_not_in_stories": [
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_new_courses\"}}]",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_courses_by_level\"}}]",
+      "predicting default action with intent restart",
+      "predicting default action with intent session_start",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_new_courses\"}}, {\"prev_action\": {\"action_name\": \"action_list_new_courses\"}, \"user\": {\"intent\": \"ask_new_courses\"}}]",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"ask_courses_by_level\"}}, {\"prev_action\": {\"action_name\": \"action_list_courses_by_level\"}, \"user\": {\"intent\": \"ask_courses_by_level\"}}]",
+      "predicting default action with intent back"
+    ]
+  }
+}
