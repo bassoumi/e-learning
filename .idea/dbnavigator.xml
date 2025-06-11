@@ -42,11 +42,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc">
-      <console name="psotgres_E-learning Connection" type="STANDARD" schema="public" session="Main"><![CDATA[SELECT s.*, i.*
-  FROM student s 
-  LEFT JOIN student_instructor_subscription sis ON s.id = sis.student_id
-  LEFT JOIN instructors i            ON i.id = sis.instructor_id
- WHERE s.id = 502;]]></console>
+      <console name="psotgres_E-learning Connection" type="STANDARD" schema="public" session="Main"><![CDATA[DELETE FROM video_summaries;]]></console>
       <console name="psotgres_E-learning Connection 1" type="STANDARD" schema="public" session="Main" />
     </connection>
   </component>
@@ -55,8 +51,8 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/content" />
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/courses" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="consoles/psotgres_E-learning Connection" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/video_summaries" />
     </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
@@ -76,6 +72,7 @@
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.instructors" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.likes" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.quiz_question" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.video_summaries" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.content" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.courses" active-filter-id="EMPTY_FILTER" />
   </component>

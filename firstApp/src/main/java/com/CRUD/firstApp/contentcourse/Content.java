@@ -4,6 +4,7 @@ package com.CRUD.firstApp.contentcourse;
 import com.CRUD.firstApp.courses.Courses;
 import com.CRUD.firstApp.feedback.Commentaire;
 import com.CRUD.firstApp.feedback.Like;
+import com.CRUD.firstApp.video.VideoSummary;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -34,6 +35,10 @@ public class Content {
 
     @OneToMany(mappedBy = "contenuCours", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Commentaire> commentaires = new ArrayList<>();
+
+
+    @OneToOne(mappedBy = "content", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    private VideoSummary videoSummary;
 
 
 

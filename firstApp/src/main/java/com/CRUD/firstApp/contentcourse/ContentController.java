@@ -1,6 +1,9 @@
 package com.CRUD.firstApp.contentcourse;
 
 
+import com.CRUD.firstApp.video.VideoSummary;
+import com.CRUD.firstApp.video.VideoSummaryResponse;
+import com.CRUD.firstApp.video.VideoSummaryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,9 +14,12 @@ import java.util.List;
 public class ContentController {
 
     private final ContentService contentService;
+    private final VideoSummaryService summaryService;
 
-    public ContentController(ContentService contentService) {
+
+    public ContentController(ContentService contentService, VideoSummaryService summaryService) {
         this.contentService = contentService;
+        this.summaryService = summaryService;
     }
 
     @GetMapping
@@ -45,5 +51,17 @@ public class ContentController {
          contentService.deleteContentById(id);
         return  ResponseEntity.ok("Content deleted successfully");
     }
+    @PostMapping("/{id}/summarize")
+    public VideoSummaryResponse summarizeContent(@PathVariable Integer id) {
+        VideoSummary vs = summaryService.generateAndSaveSummary(id);
+        return new VideoSummaryResponse(vs);
+    }
+
+    @GetMapping("/{id}/summary")
+    public VideoSummaryResponse getContentSummary(@PathVariable int id) {
+        VideoSummary vs = summaryService.getLatestSummaryByContentId(id);
+        return new VideoSummaryResponse(vs);
+    }
+
 
 }

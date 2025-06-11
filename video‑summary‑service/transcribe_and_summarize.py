@@ -4,12 +4,12 @@ import whisper
 from yt_dlp import YoutubeDL
 from transformers import pipeline
 
-# Précharger les modèles
+# Load models once at startup
 model = whisper.load_model("base")
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
 def download_audio(youtube_url):
-    filename = str(uuid.uuid4())  # Nom sans extension
+    filename = str(uuid.uuid4())  # Unique filename without extension
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": filename,
@@ -36,7 +36,6 @@ def summarize(text, max_length=200, min_length=50):
         print("Le texte est vide, résumé impossible.")
         return "No text to summarize."
 
-    # Adapter max_length si texte trop court
     input_len = len(text)
     if input_len < min_length:
         max_length = input_len
@@ -52,14 +51,14 @@ def summarize(text, max_length=200, min_length=50):
         print(f"Erreur lors du résumé: {e}")
         return f"Erreur lors du résumé: {e}"
 
-# Exemple d'utilisation
+# Example usage for local testing
 if __name__ == "__main__":
-    url = "https://www.youtube.com/watch?v=GT3Doklq0RY"  # URL de test
+    url = "https://www.youtube.com/watch?v=GT3Doklq0RY"  # Test URL
     audio_file = download_audio(url)
     text = transcribe(audio_file)
     summary = summarize(text)
     print("Résumé final :", summary)
 
-    # Optionnel : supprimer le fichier audio après traitement
+    # Clean up audio file
     if os.path.exists(audio_file):
         os.remove(audio_file)
