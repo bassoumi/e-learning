@@ -1,11 +1,14 @@
 spring:
   application:
     name: firstApp
+
   datasource:
     url: jdbc:postgresql://localhost:5434/mydb
     username: user
     password: user
     driver-class-name: org.postgresql.Driver
+    hikari:
+      auto-commit: false        # Désactive l'auto-commit au niveau du pool HikariCP
 
   jpa:
     hibernate:
@@ -14,6 +17,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        connection:
+          provider_disables_autocommit: true  # Désactive l'auto-commit pour la gestion des LOBs par Hibernate
 
   mail:
     host: localhost
@@ -30,7 +35,3 @@ spring:
 
 rasa:
   url: http://localhost:5006
-
-
-
-
