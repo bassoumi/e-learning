@@ -12,7 +12,7 @@ public record CategorieResponce(
 
         String description,
 
-        String slug,
+
 
         String CoverCategoryimage
 

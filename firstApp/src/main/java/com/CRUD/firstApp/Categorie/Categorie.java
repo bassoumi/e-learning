@@ -26,7 +26,6 @@ public class Categorie {
 
     private String nom;
     private String description;
-    private String slug;
     private String CoverCategoryimage;
 
     private LocalDateTime creationDate;

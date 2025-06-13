@@ -2,7 +2,9 @@ package com.CRUD.firstApp.Categorie;
 
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -15,11 +17,10 @@ public record CategorieRequest(
         @NotBlank(message = "description cannot be Empty ")
         String description,
 
-        @NotBlank(message = "slug cannot be Empty ")
-        String slug,
 
-        @NotBlank(message = "CoverCategoryimage cannot be Empty ")
-        String CoverCategoryimage,
+
+        @NotNull(message = "CoverCategoryimage cannot be Empty")
+        MultipartFile CoverCategoryimage,
 
 
          LocalDateTime creationDate,
