@@ -30,7 +30,10 @@ public class InstructorsControllers {
         return instructorsService.getInstructorById(id);
     }
 
-
+    @GetMapping("/{id}/profile")
+    public InstructorsResponce getInstructorByIdForinstructors(@PathVariable int id) {
+        return instructorsService.getInstructorByIdForinstructors(id);
+    }
 
 
     @GetMapping("firstName")

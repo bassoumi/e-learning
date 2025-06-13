@@ -57,6 +57,16 @@ public class InstructorsService {
 
     }
 
+
+    public InstructorsResponce getInstructorByIdForinstructors(int id) {
+        Instructors instr = instructorsRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Instructeur introuvable pour l'id " + id));
+
+        // Map the entity to your response record
+        return instructorsMapper.toResponce(instr);
+    }
+
     @Transactional
     public void deleteInstructorById(int id) {
 
