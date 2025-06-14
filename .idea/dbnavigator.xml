@@ -51,7 +51,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/video_summaries" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/categorie" />
     </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
@@ -65,6 +65,7 @@
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.commentaires" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.student" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.progression" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.categorie" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.admin" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.quiz" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" dataset="public.instructor_courses" active-filter-id="EMPTY_FILTER" />

@@ -41,34 +41,32 @@ public class CategorieController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CategorieResponce createCategorie(
-            @RequestParam("nom") @NotBlank String nom,
-            @RequestParam("description") @NotBlank String description,
-            @RequestPart("CoverCategoryimage") @NotNull MultipartFile coverImage
+            @ModelAttribute CategorieRequest request
     ) throws IOException {
-        return categorieService.createCategorie(nom, description, coverImage);
-    }
-
-
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public CategorieResponce updateCategorie(
-            @PathVariable int id,
-
-            @RequestParam(value = "nom", required = false) String nom,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestPart(value = "covercategoryimage", required = false) MultipartFile coverImage
-    ) throws IOException {
-
-        // Build the request DTO with nulls for fields not sent
-        CategorieRequest request = new CategorieRequest(
-                nom,
-                description,
-                coverImage,
-                null,
-                null
+        return categorieService.createCategorie(
+                request.nom(),
+                request.description(),
+                request.cover_categoryimage()
         );
-
-        return categorieService.updateCategroie(id, request);
     }
+
+
+
+    // 3. Méthode PUT en utilisant exactement le même DTO
+    @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CategorieResponce updateCategorie(
+            @PathVariable Integer id,
+            @ModelAttribute CategorieRequest request
+    ) throws IOException {
+        return categorieService.updateCategorie(
+                id,
+                request.nom(),
+                request.description(),
+                request.cover_categoryimage()
+        );
+    }
+
+
 
 
     @DeleteMapping("/{id}")

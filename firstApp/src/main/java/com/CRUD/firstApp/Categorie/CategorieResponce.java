@@ -14,7 +14,7 @@ public record CategorieResponce(
 
 
 
-        String CoverCategoryimage
+        String cover_categoryimage
 
 
 

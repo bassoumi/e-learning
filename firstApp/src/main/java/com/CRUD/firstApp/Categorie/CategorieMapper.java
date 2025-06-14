@@ -15,7 +15,7 @@ public class CategorieMapper {
         categorie.setNom(request.nom());
         categorie.setDescription(request.description());
 
-        MultipartFile file = request.CoverCategoryimage();
+        MultipartFile file = request.cover_categoryimage();
         if (file != null && !file.isEmpty()) {
             // Nettoie le nom et ajoute un UUID pour éviter les collision
             String original = StringUtils.cleanPath(file.getOriginalFilename());

@@ -1,5 +1,6 @@
 package com.CRUD.firstApp.Categorie;
 
+import com.CRUD.firstApp.courses.CourseFileStorageService;
 import com.CRUD.firstApp.courses.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -25,10 +26,12 @@ public class CategorieService {
 
     private final CategorieRepository categorieRepository;
     private final CategorieMapper categorieMapper;
+    private final CourseFileStorageService courseFileStorageService;
 
-    public CategorieService(CategorieRepository categorieRepository, CategorieMapper categorieMapper) {
+    public CategorieService(CategorieRepository categorieRepository, CategorieMapper categorieMapper, CourseFileStorageService courseFileStorageService) {
         this.categorieRepository = categorieRepository;
         this.categorieMapper = categorieMapper;
+        this.courseFileStorageService = courseFileStorageService;
     }
 
     public List<CategorieResponce> getAllCategories() {
@@ -58,41 +61,34 @@ public class CategorieService {
             String description,
             MultipartFile coverImage
     ) throws IOException {
-        // 1. Créer l’entité
+        // 1. Sauvegarde du fichier sur disque (même dossier que pour les instructeurs)
+        String storedName = null;
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String originalName = coverImage.getOriginalFilename();
+            storedName = UUID.randomUUID() + "_" + originalName;
+            Path target = Paths.get("uploads/images", storedName);
+            Files.createDirectories(target.getParent());
+            Files.write(target, coverImage.getBytes());
+        }
+
+        // 2. Création de l’entité
         Categorie categorie = new Categorie();
         categorie.setNom(nom);
         categorie.setDescription(description);
         categorie.setCreationDate(LocalDateTime.now());
         categorie.setModificationDate(LocalDateTime.now());
+        // on stocke le nom du fichier comme pour Instructor
+        categorie.setCoverCategoryimage(storedName);
 
-        // 2. Sauvegarde de l’image « à la volée »
-        if (coverImage != null && !coverImage.isEmpty()) {
-            String originalName = StringUtils.cleanPath(coverImage.getOriginalFilename());
-
-            // 🔐 Nettoyage du nom pour enlever les caractères spéciaux
-            String safeName = Normalizer.normalize(originalName, Normalizer.Form.NFD)
-                    .replaceAll("[^\\w\\.-]", "_"); // autorise lettres, chiffres, . et -
-
-            String storedName = UUID.randomUUID() + "_" + safeName;
-
-            // 📂 Dossier de stockage
-            Path uploadDir = Paths.get("uploads/categories");
-            Files.createDirectories(uploadDir); // crée si non existant
-
-            Path target = uploadDir.resolve(storedName).normalize();
-            Files.write(target, coverImage.getBytes());
-
-            categorie.setCoverCategoryimage(storedName);
-        } else {
-            categorie.setCoverCategoryimage(null);
-        }
-
-        // 3. Sauvegarde en base
+        // 3. Persistance
         Categorie saved = categorieRepository.save(categorie);
 
-        // 4. Retour DTO
+        // 4. Conversion en DTO (le mapper doit gérer exactement comme pour Instructor)
         return categorieMapper.toCategorieResponce(saved);
     }
+
+
+
 
     public List<CategorieResponce> getCategorieByName(String name) {
        return categorieRepository.findByNom(name).stream()
@@ -101,44 +97,43 @@ public class CategorieService {
 
     }
 
-    public CategorieResponce updateCategroie(int id, CategorieRequest request) throws IOException {
-        Categorie category = categorieRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found with ID: " + id));
+    public CategorieResponce updateCategorie(
+            Integer id,
+            String nom,
+            String description,
+            MultipartFile coverImage
+    ) throws IOException {
+        // 1. On récupère l’entité existante
+        Categorie categorie = categorieRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Category not found with ID: " + id
+                ));
 
-        // Mise à jour des champs textuels s'ils sont présents
-        if (StringUtils.hasText(request.nom())) {
-            category.setNom(request.nom().trim());
+        // 2. Mise à jour des textes
+        if (StringUtils.hasText(nom)) {
+            categorie.setNom(nom.trim());
+        }
+        if (StringUtils.hasText(description)) {
+            categorie.setDescription(description.trim());
+        }
+        categorie.setModificationDate(LocalDateTime.now());
+
+        // 3. Même logique de stockage que dans createCategorie
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String originalName = coverImage.getOriginalFilename();
+            String storedName   = UUID.randomUUID() + "_" + originalName;
+            Path target         = Paths.get("uploads/images", storedName);
+            Files.createDirectories(target.getParent());
+            Files.write(target, coverImage.getBytes());
+            categorie.setCoverCategoryimage(storedName);
         }
 
-        if (StringUtils.hasText(request.description())) {
-            category.setDescription(request.description().trim());
-        }
-
-        category.setModificationDate(LocalDateTime.now());
-
-        // Mise à jour de l'image si une nouvelle image est fournie
-        if (request.CoverCategoryimage() != null && !request.CoverCategoryimage().isEmpty()) {
-            String originalName = StringUtils.cleanPath(request.CoverCategoryimage().getOriginalFilename());
-
-            // Nettoyage du nom pour éviter les erreurs liées aux caractères spéciaux
-            String safeName = Normalizer.normalize(originalName, Normalizer.Form.NFD)
-                    .replaceAll("[^\\w\\.-]", "_"); // Remplace les caractères non valides
-
-            String storedName = UUID.randomUUID() + "_" + safeName;
-
-            Path uploadDir = Paths.get("uploads/categories");
-            Files.createDirectories(uploadDir); // Crée le dossier si nécessaire
-
-            Path target = uploadDir.resolve(storedName).normalize();
-            Files.write(target, request.CoverCategoryimage().getBytes());
-
-            category.setCoverCategoryimage(storedName);
-        }
-
-        // Sauvegarde finale
-        Categorie updated = categorieRepository.save(category);
+        // 4. Persistance et retour DTO
+        Categorie updated = categorieRepository.save(categorie);
         return categorieMapper.toCategorieResponce(updated);
     }
+
 
     public void deleteById(int id) {
         categorieRepository.deleteById(id);

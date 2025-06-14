@@ -20,7 +20,7 @@ public record CategorieRequest(
 
 
         @NotNull(message = "CoverCategoryimage cannot be Empty")
-        MultipartFile CoverCategoryimage,
+        MultipartFile cover_categoryimage,
 
 
          LocalDateTime creationDate,
