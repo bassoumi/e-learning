@@ -10,27 +10,31 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 // <-- On demande à Jackson de sérialiser cette entité par son "id" une fois déjà vue.
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
+
 public class Courses {
     @Id
     @GeneratedValue
     private int id;
 
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+    @Column(length = 500)
     private String shortDescription;
     private String level;
     private String language;
+    @Column(length = 300)
     private String coverImage;
 
     @Embedded

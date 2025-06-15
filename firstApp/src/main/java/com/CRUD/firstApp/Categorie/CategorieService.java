@@ -136,6 +136,14 @@ public class CategorieService {
 
 
     public void deleteById(int id) {
+        Categorie categorie = categorieRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Categorie not found"));
+
+        if (!categorie.getCourses().isEmpty()) {
+            throw new RuntimeException("Cannot delete category with existing courses.");
+        }
+
         categorieRepository.deleteById(id);
     }
+
 }

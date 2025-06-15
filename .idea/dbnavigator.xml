@@ -42,7 +42,8 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc">
-      <console name="psotgres_E-learning Connection" type="STANDARD" schema="public" session="Main"><![CDATA[DELETE FROM video_summaries;]]></console>
+      <console name="psotgres_E-learning Connection" type="STANDARD" schema="public" session="Main"><![CDATA[ALTER TABLE courses
+ALTER COLUMN description TYPE TEXT;]]></console>
       <console name="psotgres_E-learning Connection 1" type="STANDARD" schema="public" session="Main" />
     </connection>
   </component>
@@ -51,7 +52,10 @@
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
-      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/categorie" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/content" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/instructors" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="schemas/public/tables/courses" />
+      <object connection-id="0148bbef-bccf-4f99-8ad7-74e2c596fbdc" object-ref="consoles/psotgres_E-learning Connection" />
     </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">

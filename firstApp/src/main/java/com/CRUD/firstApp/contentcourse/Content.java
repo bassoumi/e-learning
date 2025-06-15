@@ -18,8 +18,14 @@ public class Content {
     @Id
     @GeneratedValue
     private int id;
+
+    @Column(length = 255)
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(length = 1000)
     private String videoUrl;
 
     @Column(unique = true)
