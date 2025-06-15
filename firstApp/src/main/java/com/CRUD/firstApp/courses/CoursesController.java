@@ -104,10 +104,6 @@ public class CoursesController {
         }
 
 
-
-
-
-
     @GetMapping("/{id}")
     public List<CourseResponse> getCourseById(@PathVariable int id) {
         return CourseService.getCourseById(id);

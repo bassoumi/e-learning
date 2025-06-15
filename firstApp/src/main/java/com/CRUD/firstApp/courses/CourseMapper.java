@@ -99,6 +99,11 @@ public class CourseMapper {
                 ? course.getCategorie().getId()
                 : null;
 
+        String instructorProfileImage = (course.getInstructor() != null)
+                ? course.getInstructor().getProfileImage()
+                : null;
+
+
         // 2) Récupérer et tester l’instructeur
         Integer instructorId = (course.getInstructor() != null)
                 ? course.getInstructor().getId()
@@ -156,7 +161,8 @@ public class CourseMapper {
                 course.getMetadata(),
                 instructorNames,
                 contents,
-                quizResponse
+                quizResponse,
+                instructorProfileImage
         );
     }
 

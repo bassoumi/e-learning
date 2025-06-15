@@ -19,6 +19,7 @@ public record CourseResponse(
         CourseMetaData courseMetaData,
         String instructorNames,
         List<ContentResponce> contents,
-        QuizResponse quiz
+        QuizResponse quiz,
+        String instructorProfileImage
 ) {}
 

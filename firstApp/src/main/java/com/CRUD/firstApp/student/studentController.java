@@ -130,7 +130,7 @@ public class studentController {
         List<NotificationDto> dtos = entities.stream().map(n -> {
             Courses course = n.getCourse();
             Instructors instructor = course.getInstructor();
-            Categorie category = course.getCategorie(); // ou getCategoryName() selon ton modèle
+            Categorie category = course.getCategorie();
 
             return new NotificationDto(
                     n.getId(),
@@ -139,17 +139,19 @@ public class studentController {
                     course.getShortDescription(),
                     course.getLevel(),
                     course.getLanguage(),
-                    instructor.getFirstName()+""+instructor.getLastName(), // ou getFirstName() + " " + getLastName()
+                    instructor.getFirstName() + " " + instructor.getLastName(),
                     instructor.getId(),
                     category.getNom(),
                     category.getId(),
                     course.getCoverImage(),
-                    n.getCreatedAt()
+                    n.getCreatedAt(),
+                    instructor.getProfileImage()
             );
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
     }
+
 
 
 

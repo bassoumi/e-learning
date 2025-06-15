@@ -14,6 +14,7 @@ public record NotificationDto (
         String categoryName,
         Integer categoryId,
         String coverImage,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String instructorProfileImages
 ) {
 }
