@@ -108,32 +108,32 @@ public class CourseService {
 
     @Transactional
     public void deleteCourseById(int id) {
-        // 1) Charger le Course (ou renvoyer 404)
+        // 1) Load the Course (or throw 404)
         Courses course = coursesRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Course not found with id " + id));
 
-        // 2) Supprimer la jointure instructor_courses
+        // 2) Remove instructor_courses join rows
         entityManager.createNativeQuery(
                         "DELETE FROM instructor_courses WHERE course_id = :courseId"
                 )
                 .setParameter("courseId", id)
                 .executeUpdate();
 
-        // 3) Détacher l’instructeur (Many-To-One)
+        // 3) Detach the instructor (Many‑To‑One)
         Instructors instr = course.getInstructor();
         if (instr != null) {
             instr.getCourses().remove(course);
             course.setInstructor(null);
         }
 
-        // 4) Détacher les étudiants (Many-To-Many)
+        // 4) Detach all students (Many‑To‑Many)
         for (Student stu : course.getStudents()) {
             stu.getCourses().remove(course);
         }
         course.getStudents().clear();
 
-        // ─────────────────────────────────────────────────────────────────
-        // 5a) Récupérer la liste des IDs de tous les Content liés à ce Course
+        // ───────────────────────────────────────────────────────────────
+        // 5) Handle Content and all its children (Progression, VideoSummary, Commentaires, Likes)
         @SuppressWarnings("unchecked")
         List<Integer> contentIds = entityManager.createQuery(
                         "SELECT c.id FROM Content c WHERE c.course.id = :courseId"
@@ -142,14 +142,35 @@ public class CourseService {
                 .getResultList();
 
         if (!contentIds.isEmpty()) {
-            // 5b) SUPPRIMER toutes les Progression liées à ces contenus
+            // 5a) Delete Progression rows
             entityManager.createQuery(
                             "DELETE FROM Progression p WHERE p.contentEnCours.id IN :ids"
                     )
                     .setParameter("ids", contentIds)
                     .executeUpdate();
 
-            // 5c) SUPPRIMER les Content eux-mêmes
+            // 5b) Delete VideoSummary rows
+            entityManager.createQuery(
+                            "DELETE FROM VideoSummary vs WHERE vs.content.id IN :ids"
+                    )
+                    .setParameter("ids", contentIds)
+                    .executeUpdate();
+
+            // 5c) Delete Commentaires rows
+            entityManager.createNativeQuery(
+                            "DELETE FROM commentaires WHERE contenu_id IN (:ids)"
+                    )
+                    .setParameter("ids", contentIds)
+                    .executeUpdate();
+
+            // 5d) Delete Likes rows
+            entityManager.createNativeQuery(
+                            "DELETE FROM likes WHERE contenu_id IN (:ids)"
+                    )
+                    .setParameter("ids", contentIds)
+                    .executeUpdate();
+
+            // 5e) Delete the Content rows themselves
             entityManager.createNativeQuery(
                             "DELETE FROM content WHERE course_id = :courseId"
                     )
@@ -157,26 +178,27 @@ public class CourseService {
                     .executeUpdate();
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // 6) SUPPRIMER toutes les Notifications liées à ce Course
+        // ───────────────────────────────────────────────────────────────
+        // 6) Delete Notification rows
         entityManager.createQuery(
                         "DELETE FROM Notification n WHERE n.course.id = :courseId"
                 )
                 .setParameter("courseId", id)
                 .executeUpdate();
 
-        // ─────────────────────────────────────────────────────────────────
-        // 7) SUPPRIMER toutes les entrées d’Agenda liées à ce Course
+        // ───────────────────────────────────────────────────────────────
+        // 7) Delete Agenda entries
         entityManager.createQuery(
                         "DELETE FROM Agenda a WHERE a.course.id = :courseId"
                 )
                 .setParameter("courseId", id)
                 .executeUpdate();
 
-        // ─────────────────────────────────────────────────────────────────
-        // 8) Enfin, supprimer le Course lui-même
+        // ───────────────────────────────────────────────────────────────
+        // 8) Finally delete the Course itself
         coursesRepository.delete(course);
     }
+
 
 
 
